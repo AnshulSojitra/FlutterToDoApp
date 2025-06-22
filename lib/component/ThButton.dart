@@ -10,9 +10,9 @@ class ThButton extends StatelessWidget {
     var backgroundColor=Colors.transparent;
     var foregroundColor=Colors.black;
     var border=BorderSide(color: Colors.grey, width: 1);
-    var hoverBackground;
-    var hoverForeground;
-    var hoverborder;
+    Color hoverBackground=Colors.transparent;
+    Color hoverForeground=Colors.transparent;
+    BorderSide hoverborder=BorderSide(color: Colors.transparent, width: 1);
     if(variant=='primary'){
       backgroundColor = Colors.deepPurpleAccent;
       foregroundColor=Colors.white;
@@ -50,17 +50,26 @@ class ThButton extends StatelessWidget {
       return TextButton(
         onPressed: () {},
         style: TextButton.styleFrom(
+
           foregroundColor: Colors.black, // Text + icon color
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ).copyWith(
-          overlayColor: MaterialStateProperty.resolveWith<Color?>(
+          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
                 (states) {
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return Colors.black; // Hover background color
               }
-              return null;
+              return Colors.transparent;
             },
           ),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                  (states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return Colors.black12; // Hover background color
+                }
+                return null;
+              },
+            ),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.hovered)) {
               return Colors.white; // Hover: white text
@@ -69,13 +78,16 @@ class ThButton extends StatelessWidget {
           }),
           animationDuration: Duration.zero
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ?icon,
-            const SizedBox(width: 6),
-            Text(text,style: TextStyle(fontSize: 18,fontFamily: 'RobotoFont'),),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ?icon,
+              const SizedBox(width: 19),
+              Text(text,style: TextStyle(fontSize: 18,fontFamily: 'RobotoFont'),),
+            ],
+          ),
         ),
       );
     }
@@ -105,6 +117,14 @@ class ThButton extends StatelessWidget {
           }
           return backgroundColor;   // Default: white background
         }),
+        overlayColor: WidgetStateProperty.resolveWith<Color?>(
+              (states) {
+            if (states.contains(WidgetState.hovered)) {
+              return Colors.transparent; // Hover background color
+            }
+            return Colors.transparent;
+          },
+        ),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.hovered)) {
             return hoverForeground; // Hover: white text

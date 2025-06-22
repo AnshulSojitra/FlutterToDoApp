@@ -11,9 +11,9 @@ class ThSideBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: this.width,
+      width: width,
       decoration: BoxDecoration(
-        color: this.color,
+        color: color,
         boxShadow: [
           BoxShadow(
             //color: Colors.white38,
@@ -29,7 +29,7 @@ class ThSideBar extends StatelessWidget {
           children:[
             ...upperbuttons,
             Spacer(),
-            Padding(padding: EdgeInsets.symmetric(horizontal: 15), child: Divider(color: Colors.grey.withOpacity(0.5),thickness: 1,)),
+            Padding(padding: EdgeInsets.symmetric(horizontal: 15), child: Divider(color: Colors.grey.withAlpha((0.5*255).toInt()),thickness: 1,)),
             ...lowerbuttons,
           ]
         ),

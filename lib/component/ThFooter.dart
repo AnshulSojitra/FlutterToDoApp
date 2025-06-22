@@ -22,7 +22,7 @@ class ThFooter extends StatelessWidget implements PreferredSizeWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black,
             blurRadius: 0,
             offset: const Offset(0, 0),
           ),

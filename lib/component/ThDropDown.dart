@@ -8,15 +8,15 @@ class ThDropdown extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final double width;
   final double height;
-  const ThDropdown({
-    Key? key,
+  const ThDropdown({super.key,
+
     this.variant = 'dropdown',
     this.label = 'Select Option',
     required this.options,
     this.onChanged,
     this.width=335,
     this.height=50,
-  }) : super(key: key);
+  }) ;
 
   @override
   State<ThDropdown> createState() => _ThDropdownState();

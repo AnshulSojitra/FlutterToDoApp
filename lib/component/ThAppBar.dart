@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'ThButton.dart';
+
 
 class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
 
@@ -30,7 +30,7 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withAlpha((0.25*255).toInt()),
             blurRadius: 8,
             offset: const Offset(0, 0.15),
           ),

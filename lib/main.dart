@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:untitled1/pages/Home.dart';
 
-import 'package:untitled1/pages/template.dart';
+
 
 
 void main() {

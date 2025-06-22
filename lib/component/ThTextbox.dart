@@ -6,12 +6,16 @@ class ThTextbox extends StatefulWidget {
   final String text;
   final double width;
   final double height;
+  final Icon? prefixicon;
+  final Icon? suffixicon;
   const ThTextbox({
     super.key,
     this.variant = 'basic',
     this.text = 'Enter Text',
     this.width=335,
     this.height=50,
+    this.prefixicon,
+    this.suffixicon,
   });
 
   @override
@@ -28,11 +32,11 @@ class _ThTextboxState extends State<ThTextbox> {
     TextInputType? type;
     List<TextInputFormatter>? format;
     int maxLines = 1;
-    Widget? prefixIcon=Icon(Icons.drive_file_rename_outline,size: 14,);
-    Widget? suffixIcon;
+    Widget? prefixIcon=widget.prefixicon;
+    Widget? suffixIcon=widget.suffixicon;
     // Handle specific variants
     if (widget.variant == 'password') {
-      prefixIcon = const Icon(Icons.lock_outline,size: 14,);
+      prefixIcon = widget.prefixicon;
       suffixIcon = IconButton(
         icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility,size: 14,),
         onPressed: () {
@@ -42,11 +46,13 @@ class _ThTextboxState extends State<ThTextbox> {
         },
       );
     } else if (widget.variant == 'number') {
-      prefixIcon = const Icon(Icons.phone_android_outlined,size: 14,);
+      prefixIcon = widget.prefixicon;
+      suffixIcon=widget.suffixicon;
       type = TextInputType.number;
       format = [FilteringTextInputFormatter.digitsOnly];
     } else if (widget.variant == 'multiline') {
-      prefixIcon = const Icon(Icons.home_outlined,size: 14,);
+      prefixIcon = widget.prefixicon;
+      suffixIcon=widget.suffixicon;
       type = TextInputType.multiline;
       maxLines = 5;
     }

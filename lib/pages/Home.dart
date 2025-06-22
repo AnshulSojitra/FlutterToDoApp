@@ -3,148 +3,130 @@ import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
 import 'package:untitled1/component/ThDropDown.dart';
 import 'package:untitled1/component/ThFooter.dart';
+import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThBreadCrumb.dart';
-
-
 import 'package:untitled1/component/ThTextbox.dart';
-class Home extends StatelessWidget {
 
-
+class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  String currentUserRole = "user";
+
+  final List<Map<String, dynamic>> menuItems = [
+    {"label": "Home", "icon": "home", "allowFor": ["user", "admin"]},
+    {"label": "Profile", "icon": "person", "allowFor": ["admin"]},
+    {"label": "Settings", "icon": "settings", "allowFor": ["user", "admin"]},
+  ];
+
+  Icon logo(String iconName) {
+    if (iconName == "home") return Icon(Icons.dashboard);
+    if (iconName == "person") return Icon(Icons.person);
+    if (iconName == "settings") return Icon(Icons.settings);
+    return Icon(Icons.dashboard);
+  }
+  bool addclick=false;
+  @override
   Widget build(BuildContext context) {
-    String jsonString = '[{"menutitle": "home","allowFor": ["admin","user"]},{"menutitle": "Settings","allowFor": ["admin"]}]';
-    String currentUserRole="user";
-    final List<Map<String, dynamic>> menuItems = [
-    { "label": "Home", "icon": "home", "allowFor":["user","admin"] },
-    { "label": "Profile", "icon": "person" ,"allowFor":["admin"]},
-    { "label": "Settings", "icon": "settings" ,"allowFor":["user","admin"]},];
-
-    Icon logo(String iconName){
-      if(iconName=="home"){
-        return Icon(Icons.dashboard);
-      }
-      else if(iconName=="person"){
-        return Icon(Icons.person);
-      }
-      else if(iconName=="settings"){
-        return Icon(Icons.settings);
-      }
-      
-      return Icon(Icons.dashboard);
-    }
     return Scaffold(
-
       backgroundColor: Colors.white,
       appBar: ThAppBar(
-
         leftWidgets: [
-          Icon(Icons.home,size: 30,),
-          Text('Website',style: TextStyle(fontSize: 25,fontFamily: 'GilroyFont'),),
+          Icon(Icons.home, size: 30),
+          Text('Website', style: TextStyle(fontSize: 25, fontFamily: 'GilroyFont')),
+          SizedBox(width: 100),
+          ThTextbox(
+            width: 400,
+            height: 40,
+            text: 'Search',
+            prefixicon: Icon(Icons.search),
+          )
         ],
         rightWidgets: [
-          ThButton(variant: 'dark',text: 'click',),
-          ThTextbox(variant: 'password',height: 30,width: 200,),
-          ThDropdown(variant:'search',options: ['abc','xyz','pqr'],height: 30,width: 200,),
-          ThDropdown(options: ['abc','xyz','pqr'],height: 30,width: 200,)
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Home()),
+              );
+            },
+          ),
+          IconButton(icon: Icon(Icons.format_list_bulleted_outlined), onPressed: () {}),
+          IconButton(icon: Icon(Icons.settings_outlined), onPressed: () {}),
+          IconButton(icon: Icon(Icons.apps), onPressed: () {}),
         ],
       ),
       body: Stack(
-
-        children:[ Row(
-
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.start,
-
-          children: [ThSideBar(
-             upperbuttons:menuItems.where((item)=>item['allowFor'] is List && item['allowFor'].contains(currentUserRole)).map((item){
-               return ThButton(variant:'plain',text: item["label"]!,icon: logo(item['icon']!),);
-             }).toList()
-          //    [
-          //   ThButton(variant:'plain',text: 'dashboard',icon: Icon(Icons.dashboard),),
-          //   ThButton(variant:'plain',text: 'settings',icon: Icon(Icons.settings),),
-          // ],
-            ,
-           lowerbuttons: [
-             ThButton(variant:'plain',text: 'Get Support',icon: Icon(Icons.contact_support),),
-             ThButton(variant:'plain',text: 'Log Out',icon: Icon(Icons.login_outlined),),
-           ],
-            width: 240,
-            color: Colors.white70.withOpacity(0.9) ,
-          ),
-
-              
-                 Expanded(
-                   child: Column(
-                     children:[Expanded(
-                       child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          scrollbars: false, // 👈 disables platform scrollbars
-                        ),
+            children: [
+              ThSideBar(
+                upperbuttons: [
+                  ThButton(variant: 'plain', text: 'Notes', icon: Icon(Icons.notes_outlined, size: 22)),
+                  ThButton(variant: 'plain', text: 'Reminders', icon: Icon(Icons.notifications_none_outlined, size: 22)),
+                  ThButton(variant: 'plain', text: 'Edit labels', icon: Icon(Icons.mode_edit_outlined, size: 22)),
+                ],
+                lowerbuttons: [
+                  ThButton(variant: 'plain', text: 'Archive', icon: Icon(Icons.archive_outlined)),
+                  ThButton(variant: 'plain', text: 'Bin', icon: Icon(Icons.delete_outline)),
+                ],
+                width: 240,
+                color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                         child: SingleChildScrollView(
-                                       
                           child: Padding(
                             padding: EdgeInsets.all(15),
                             child: Column(
-                              spacing: 15,
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children:[
-                                ThBreadcrumb(items:['home','settings','help']),
-                                       
-                                Row(//row of buttons
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  spacing: 15,
-                                  children: [
-                                    ThButton(variant: "primary", text: "btn2"),
-                                    ThButton(variant: 'primary-outline', text: "btn3"),
-                                    ThButton(variant: 'dark', text: "btn4"),
-                                    ThButton(variant: 'dark-outline'),
-                                  ]
-                              ),
-                                ThTextbox(),
-                                ThTextbox(variant: 'password',text: 'Enter Password',),
-                                ThTextbox(variant: 'number',text: 'Enter number',),
-                                ThTextbox(variant: 'multiline',text: 'Enter mulilines',),
-                                ThTextbox(variant: 'password',text: 'Enter Password',),
-                                ThTextbox(variant: 'number',text: 'Enter number',),
-                                ThDropdown(
-                                  variant: 'search', // or 'dropdown'
-                                  label: 'Fruits',
-                                  options: ['peach', 'mang', 'apple'],
-                                       
+                              children: [
+                                ThIconBox(
+                                  text: 'Take a note',
+                                  width: 700,
+                                  height: 60,
+                                  sufixicons: SizedBox(
+                                    width: 80,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(icon: Icon(Icons.add), onPressed: () {}),
+                                        IconButton(icon: Icon(Icons.image_outlined), onPressed: () {}),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                       
-                                ThDropdown(
-                                  variant: 'dropdown', // or 'dropdown'
-                                  label: 'Gender',
-                                  options: ['Male', 'Female', 'Other'],
-                                       
-                                ),
-                                ThTextbox(variant: 'password',height: 30,width: 200,),
-                                ThTextbox(variant: 'password',height: 30,width: 200,),
-                                ThTextbox(variant: 'password',height: 30,width: 200,),
-                                ThTextbox(variant: 'password',height: 30,width: 200,),
-                                ThTextbox(variant: 'password',height: 30,width: 200,),
-                                       
-                            ]),
+
+                              ],
+                            ),
                           ),
                         ),
-                                       ),
-                     ),
-                       ThFooter(
-                         rightWidgets: [
-                           ThButton(variant: 'dark-outline',text: 'Back',),
-                           ThButton(variant: 'primary',text: 'Continue',)
-                         ],
-                       ),
-                   ]),
-                 ),
-
-          ]),
-
-      ]),
-      );
-
+                      ),
+                    ),
+                    ThFooter(
+                      rightWidgets: [
+                        ThButton(variant: 'dark-outline', text: 'Back'),
+                        ThButton(variant: 'primary', text: 'Continue'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
