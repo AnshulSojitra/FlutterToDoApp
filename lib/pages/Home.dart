@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
-import 'package:untitled1/component/ThDropDown.dart';
 import 'package:untitled1/component/ThFooter.dart';
 import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
-import 'package:untitled1/component/ThBreadCrumb.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 
 class Home extends StatefulWidget {
@@ -17,7 +15,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String currentUserRole = "user";
-
+  final TextEditingController myController = TextEditingController();
+  final List<String> items =[];
   final List<Map<String, dynamic>> menuItems = [
     {"label": "Home", "icon": "home", "allowFor": ["user", "admin"]},
     {"label": "Profile", "icon": "person", "allowFor": ["admin"]},
@@ -30,15 +29,28 @@ class _HomeState extends State<Home> {
     if (iconName == "settings") return Icon(Icons.settings);
     return Icon(Icons.dashboard);
   }
+
   bool addclick=false;
+  void note(){
+    String text = myController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        items.add(text);   // Add new item to list
+        myController.clear(); // Clear text field
+        addclick = true;      // Show the list
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: ThAppBar(
         leftWidgets: [
           Icon(Icons.home, size: 30),
-          Text('Website', style: TextStyle(fontSize: 25, fontFamily: 'GilroyFont')),
+          Text('Keep', style: TextStyle(fontSize: 25, fontFamily: 'GilroyFont')),
           SizedBox(width: 100),
           ThTextbox(
             width: 400,
@@ -89,26 +101,72 @@ class _HomeState extends State<Home> {
                         child: SingleChildScrollView(
                           child: Padding(
                             padding: EdgeInsets.all(15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ThIconBox(
-                                  text: 'Take a note',
-                                  width: 700,
-                                  height: 60,
-                                  sufixicons: SizedBox(
-                                    width: 80,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(icon: Icon(Icons.add), onPressed: () {}),
-                                        IconButton(icon: Icon(Icons.image_outlined), onPressed: () {}),
-                                      ],
+                            child: Center(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ThIconBox(
+                                    controller: myController,
+                                    text: 'Take a note',
+                                    width: 700,
+                                    height: 60,
+                                    sufixicons: SizedBox(
+                                      width: 80,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(icon: Icon(Icons.add), onPressed:note),
+                                          IconButton(icon: Icon(Icons.image_outlined), onPressed: () {
+                                          }),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  if(addclick)
+                                    GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3, // 2 items per row
+                                        crossAxisSpacing: 20,
+                                        mainAxisSpacing: 10,
+                                        childAspectRatio: 3, // Adjust height vs width
+                                      ),
+                                      itemCount: items.length,
+                                      itemBuilder: (context, index) {
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                          ),
 
-                              ],
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(10.0),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                              Expanded(
+                                                child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 5,
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                  children:[
+                                                IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                                IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                              ])
+                                            ]),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

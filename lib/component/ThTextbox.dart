@@ -70,6 +70,7 @@ class _ThTextboxState extends State<ThTextbox> {
         maxLines: maxLines,
         inputFormatters: format,
         decoration: InputDecoration(
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),
           isDense: true,
           labelText: widget.text,
           floatingLabelBehavior: FloatingLabelBehavior.always,

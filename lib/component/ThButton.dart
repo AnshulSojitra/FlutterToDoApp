@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-class ThButton extends StatelessWidget {
+class ThButton extends StatefulWidget {
   final String text;
   final String variant;
   final Icon? icon;
   const ThButton({super.key, this.text='ok', this.variant='default',this.icon});
 
+  @override
+  State<ThButton> createState() => _ThButtonState();
+}
+
+class _ThButtonState extends State<ThButton> {
   @override
   Widget build(BuildContext context) {
     var backgroundColor=Colors.transparent;
@@ -13,7 +18,7 @@ class ThButton extends StatelessWidget {
     Color hoverBackground=Colors.transparent;
     Color hoverForeground=Colors.transparent;
     BorderSide hoverborder=BorderSide(color: Colors.transparent, width: 1);
-    if(variant=='primary'){
+    if(widget.variant=='primary'){
       backgroundColor = Colors.deepPurpleAccent;
       foregroundColor=Colors.white;
       border=BorderSide(color: Colors.deepPurpleAccent, width: 1);
@@ -22,7 +27,7 @@ class ThButton extends StatelessWidget {
       hoverBackground=Colors.deepPurpleAccent.shade400;
     }
 
-    else if(variant=='primary-outline'){
+    else if(widget.variant=='primary-outline'){
       backgroundColor = Colors.transparent;
       foregroundColor=Colors.deepPurpleAccent;
       border=BorderSide(color: Colors.deepPurpleAccent, width: 1);
@@ -30,7 +35,7 @@ class ThButton extends StatelessWidget {
       hoverBackground=Colors.deepPurpleAccent;
       hoverForeground=Colors.white;
     }
-    else if(variant=='dark'){
+    else if(widget.variant=='dark'){
       backgroundColor = Colors.black;
       foregroundColor=Colors.white;
       border=BorderSide(color: Colors.black, width: 1);
@@ -38,7 +43,7 @@ class ThButton extends StatelessWidget {
       hoverBackground=Colors.black87;
       hoverForeground=Colors.white;
     }
-    else if(variant=='dark-outline'){
+    else if(widget.variant=='dark-outline'){
       backgroundColor = Colors.transparent;
       foregroundColor=Colors.black;
       border=BorderSide(color: Colors.black, width: 1);
@@ -46,7 +51,7 @@ class ThButton extends StatelessWidget {
       hoverBackground=Colors.black;
       hoverForeground=Colors.white;
     }
-    else if(variant=='plain'){
+    else if(widget.variant=='plain'){
       return TextButton(
         onPressed: () {},
         style: TextButton.styleFrom(
@@ -83,9 +88,9 @@ class ThButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              ?icon,
+              ?widget.icon,
               const SizedBox(width: 19),
-              Text(text,style: TextStyle(fontSize: 18,fontFamily: 'RobotoFont'),),
+              Text(widget.text,style: TextStyle(fontSize: 18,fontFamily: 'RobotoFont'),),
             ],
           ),
         ),
@@ -140,7 +145,7 @@ class ThButton extends StatelessWidget {
 
         ),
       ),
-      child: Text(text),
+      child: Text(widget.text),
     );
   }
 }

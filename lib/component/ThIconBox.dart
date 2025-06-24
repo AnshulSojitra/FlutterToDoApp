@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
-class ThIconBox extends StatelessWidget{
+class ThIconBox extends StatefulWidget{
   final double width;
   final double height;
   final String text;
   final Widget? prefixicons;
   final Widget? sufixicons;
-  final FocusNode _focusNode = FocusNode();
+  final TextEditingController controller;
 
-  ThIconBox({super.key,this.width=200,this.height=40,this.text='Enter Text', this.prefixicons, this.sufixicons});
+  ThIconBox({super.key,this.width=200,this.height=40,this.text='Enter Text', this.prefixicons, this.sufixicons,required this.controller});
+
+  @override
+  State<ThIconBox> createState() => _ThIconBoxState();
+}
+
+class _ThIconBoxState extends State<ThIconBox> {
+
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
-      height: height,
+      width: widget.width,
+      height: widget.height,
       child: TextField(
+        controller: widget.controller,
         decoration: InputDecoration(
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),
           floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelText:text,
+          labelText:widget.text,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-          suffixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: sufixicons),
-          prefixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: prefixicons),
+          suffixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: widget.sufixicons),
+          prefixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: widget.prefixicons),
 
         ),
       ),
