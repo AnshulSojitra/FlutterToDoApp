@@ -3,7 +3,9 @@ class ThButton extends StatefulWidget {
   final String text;
   final String variant;
   final Icon? icon;
-  const ThButton({super.key, this.text='ok', this.variant='default',this.icon});
+  final bool onpage;
+  final VoidCallback? onPress;
+  const ThButton({super.key, this.text='ok', this.variant='default',this.icon,this.onpage=false, this.onPress});
 
   @override
   State<ThButton> createState() => _ThButtonState();
@@ -55,16 +57,18 @@ class _ThButtonState extends State<ThButton> {
       return TextButton(
         onPressed: () {},
         style: TextButton.styleFrom(
-
-          foregroundColor: Colors.black, // Text + icon color
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(topLeft:Radius.zero,bottomLeft:Radius.zero,topRight: Radius.circular(30),bottomRight: Radius.circular(30))
+          ),
+          foregroundColor:Colors.black, // Text + icon color
+          padding:  EdgeInsets.symmetric(horizontal:MediaQuery.of(context).size.width<=426?1: 12, vertical:MediaQuery.of(context).size.width<=426?1: 8),
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color?>(
                 (states) {
               if (states.contains(WidgetState.hovered)) {
                 return Colors.black; // Hover background color
               }
-              return Colors.transparent;
+              return widget.onpage? Colors.deepPurpleAccent:Colors.transparent;
             },
           ),
             overlayColor: WidgetStateProperty.resolveWith<Color?>(
@@ -84,7 +88,7 @@ class _ThButtonState extends State<ThButton> {
           animationDuration: Duration.zero
         ),
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(MediaQuery.of(context).size.width<=426?0:10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -97,7 +101,7 @@ class _ThButtonState extends State<ThButton> {
       );
     }
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: widget.onPress,
       style: ElevatedButton.styleFrom(
         elevation: 0, // No shadow
         backgroundColor:backgroundColor,

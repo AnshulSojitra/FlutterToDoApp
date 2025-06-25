@@ -6,8 +6,10 @@ class ThIconBox extends StatefulWidget{
   final Widget? prefixicons;
   final Widget? sufixicons;
   final TextEditingController controller;
+  final GestureTapCallback? onTap;
+  final Function(String)? onSubmitted;
 
-  ThIconBox({super.key,this.width=200,this.height=40,this.text='Enter Text', this.prefixicons, this.sufixicons,required this.controller});
+  ThIconBox({super.key,this.width=200,this.height=40,this.text='Enter Text', this.prefixicons, this.sufixicons,required this.controller, this.onSubmitted, this.onTap,});
 
   @override
   State<ThIconBox> createState() => _ThIconBoxState();
@@ -22,6 +24,8 @@ class _ThIconBoxState extends State<ThIconBox> {
       width: widget.width,
       height: widget.height,
       child: TextField(
+        onTap: widget.onTap,
+        onSubmitted: widget.onSubmitted,
         controller: widget.controller,
         decoration: InputDecoration(
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),

@@ -61,9 +61,14 @@ class _ThTextboxState extends State<ThTextbox> {
 
 
     // Default TextField
-    return SizedBox(
+    return Container(
+      constraints: BoxConstraints(
+        minWidth: 200,
+
+        minHeight: widget.height,
+      ),
       width: widget.width,
-      height: widget.height,
+      height: 40,
       child: TextField(
         obscureText: widget.variant == 'password' ? _obscureText : false,
         keyboardType: type,
