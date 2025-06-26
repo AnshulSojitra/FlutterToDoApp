@@ -1,9 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
-
 import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
@@ -24,16 +21,8 @@ class _HomeState extends State<Home> {
   final FocusNode focusNode = FocusNode();
   final FocusNode focusNode1 = FocusNode();
   final FocusNode focusNodelabel = FocusNode();
-  final List<Map<String, dynamic>> sidebarUpperItems = [
-    {'text':'Notes','icon':'Icons.notes_outlined'},
-    {'text':'Reminders','icon':'Icons.notifications_none_outlined'},
-    {'text':'Edit Labels','icon':'Icons.notifications_none_outlined'},
-    {'text':'Edit Labels','icon':'Icons.mode_edit_outlined'},
-  ];
-  final List<Map<String, dynamic>> sidebarLowerItems = [
-    {'text':'Archive','icon':'Icons.archive_outlined'},
-    {'text':'Bin','icon':'Icons.delete_outline'},
-  ];
+
+
 
   Icon logo(String iconName) {
     if (iconName == "home") return Icon(Icons.dashboard);
@@ -48,9 +37,47 @@ class _HomeState extends State<Home> {
   double iconsize=22;
   double titlesize=20;
   double width=40;
+  late List<Map<String, dynamic>> sidebarUpperItems=[];
+  late List<Map<String, dynamic>> sidebarLowerItems=[];
+
+
   @override
   void initState() {
     super.initState();
+    sidebarUpperItems=[
+      {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':true,'onPress':(){}},
+      {'variant':'plain','text':'Reminders','icon':Icons.notifications_none_outlined,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Edit Labels','icon':Icons.mode_edit_outlined,'onpage':false,
+        'onPress':(){
+          showDialog(context: context, builder: (context){
+            return AlertDialog(
+              title: Text('Add Label'),
+              content: SizedBox(
+                height: 100,
+                child: Column(
+                    spacing: 8,
+                    children:[
+                      ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted:(x){addlabel();}),
+                      Row(
+                        spacing: 8,
+                        children: [
+                          ThButton(text: 'Add',variant: 'primary',onPress: addlabel,),
+                          ThButton(variant: 'dark-outline',text: 'Cancel',onPress: (){
+                            Navigator.of(context).pop();
+                          },)
+                        ],
+                      )
+                    ]
+                ),
+              ),
+            );
+          });
+        }},
+    ];
+    sidebarLowerItems=[
+      {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){}},
+    ];
     focusNode1.addListener(() {
       if (!focusNode1.hasFocus) {
         width=40;
@@ -76,19 +103,7 @@ class _HomeState extends State<Home> {
     showicontext=false;
     setState(() {});
   }
-  void addlabel(){
-    String text = labelController.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        labelController.clear();
-      labels.add(
-        ThButton(variant: 'plain',text: opensidebar?text:'',icon: Icon(Icons.label_important_outline),onPress: (){},)
-      );
-      });
-    }
-    FocusScope.of(context).requestFocus(focusNodelabel);
-    setState(() {});
-  }
+
   void addnote(){
 
     if(MediaQuery.of(context).size.width<=426){
@@ -103,6 +118,22 @@ class _HomeState extends State<Home> {
       });
       FocusScope.of(context).requestFocus(focusNode);
     }
+    setState(() {});
+  }
+
+
+  void addlabel(){
+    String text = labelController.text.trim();
+    if (text.isNotEmpty) {
+      setState(() {
+        labelController.clear();
+        sidebarUpperItems.add(
+            {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
+            // ThButton(variant: 'plain',text: opensidebar?text:'',icon: Icon(Icons.label_important_outline),onPress: (){},)
+        );
+      });
+    }
+    FocusScope.of(context).requestFocus(focusNodelabel);
     setState(() {});
   }
   Widget android(){
@@ -342,45 +373,14 @@ class _HomeState extends State<Home> {
           width: 160,
           color: Colors.white.withOpacity(0.95),
           child: ThSideBar(
-
-            upperbuttons: [
-              ThButton(variant: 'plain', text: 'Notes', icon: Icon(Icons.notes_outlined, size: 16), onpage: true),
-              ThButton(variant: 'plain', text: 'Reminders', icon: Icon(Icons.notifications_none_outlined, size: 16)),
-              ThButton(variant: 'plain', text: 'Edit labels', icon: Icon(Icons.mode_edit_outlined, size: 16),
-                onPress: (){
-                  showDialog(context: context, builder: (context){
-                    return AlertDialog(
-                    title: Text('Add Label'),
-                    content: SizedBox(
-                      height: 100,
-                      child: Column(
-                        spacing: 8,
-                        children:[
-                          ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted: (x){addlabel();},),
-                          Row(
-                            spacing: 8,
-                            children: [
-                              ThButton(text: 'Add',variant: 'primary',onPress: addlabel,),
-                              ThButton(variant: 'dark-outline',text: 'Cancel',onPress: (){
-                                Navigator.of(context).pop();
-                              },)
-                            ],
-                          )
-                        ]
-                      ),
-                    ),
-                  );
-                  });
-                },
-              ),
-              ...labels
-            ],
-            lowerbuttons: [
-              ThButton(variant: 'plain', text: 'Archive', icon: Icon(Icons.archive_outlined)),
-              ThButton(variant: 'plain', text: 'Bin', icon: Icon(Icons.delete_outline)),
-            ],
-            width: 160,
+            width: opensidebar? screenwidth<=990?172:240:74,
             color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+            upperbuttons: sidebarUpperItems.map((item){
+              return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+            }).toList(),
+            lowerbuttons: sidebarLowerItems.map((item){
+              return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+            }).toList(),
           ),
         ),
       ),
@@ -390,6 +390,7 @@ class _HomeState extends State<Home> {
   }
   @override
   Widget build(BuildContext context) {
+
     final screenwidth=MediaQuery.of(context).size.width;
     return screenwidth<=426?android():
     Scaffold(
@@ -465,42 +466,12 @@ class _HomeState extends State<Home> {
               ThSideBar(
                 width: opensidebar? screenwidth<=990?172:240:74,
                 color: Colors.white70.withAlpha((0.9 * 255).toInt()),
-                upperbuttons: [
-                  ThButton(variant: 'plain', text: opensidebar?'Notes':'', icon: Icon(Icons.notes_outlined, size: 22),onpage: true,onPress: (){},),
-                  ThButton(onPress:(){},variant: 'plain', text:opensidebar? 'Reminders':'', icon: Icon(Icons.notifications_none_outlined, size: 22,)),
-                  ThButton(variant: 'plain', text: opensidebar?'Edit labels':'', icon: Icon(Icons.mode_edit_outlined, size: 22),
-                      onPress: (){
-                    showDialog(context: context, builder: (context){
-                      return AlertDialog(
-                        title: Text('Add Label'),
-                        content: SizedBox(
-                          height: 100,
-                          child: Column(
-                            spacing: 8,
-                              children:[
-                            ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted:(x){addlabel();}),
-                            Row(
-                              spacing: 8,
-                              children: [
-                                ThButton(text: 'Add',variant: 'primary',onPress: addlabel,),
-                                ThButton(variant: 'dark-outline',text: 'Cancel',onPress: (){
-                                  Navigator.of(context).pop();
-                                },)
-                              ],
-                            )
-                          ]
-                          ),
-                        ),
-                      );
-                    });
-                      },
-                  ),
-                  ...labels
-                ],
-                lowerbuttons: [
-                  ThButton(variant: 'plain', text:opensidebar? 'Archive':'', icon: Icon(Icons.archive_outlined,size: 22,),onPress: (){},),
-                  ThButton(variant: 'plain', text:opensidebar? 'Bin':'', icon: Icon(Icons.delete_outline,size: 22,),onPress: (){},),
-                ],
+                upperbuttons: sidebarUpperItems.map((item){
+                  return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                }).toList(),
+                lowerbuttons: sidebarLowerItems.map((item){
+                  return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                }).toList(),
               ),
               Expanded(
                 child: Column(
