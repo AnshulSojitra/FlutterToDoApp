@@ -16,7 +16,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String currentUserRole = "user";
+  String currentUserRole = "admin";
   final TextEditingController myController = TextEditingController();
   final TextEditingController labelController = TextEditingController();
   final List<String> items =[];
@@ -24,10 +24,15 @@ class _HomeState extends State<Home> {
   final FocusNode focusNode = FocusNode();
   final FocusNode focusNode1 = FocusNode();
   final FocusNode focusNodelabel = FocusNode();
-  final List<Map<String, dynamic>> menuItems = [
-    {"label": "Home", "icon": "home", "allowFor": ["user", "admin"]},
-    {"label": "Profile", "icon": "person", "allowFor": ["admin"]},
-    {"label": "Settings", "icon": "settings", "allowFor": ["user", "admin"]},
+  final List<Map<String, dynamic>> sidebarUpperItems = [
+    {'text':'Notes','icon':'Icons.notes_outlined'},
+    {'text':'Reminders','icon':'Icons.notifications_none_outlined'},
+    {'text':'Edit Labels','icon':'Icons.notifications_none_outlined'},
+    {'text':'Edit Labels','icon':'Icons.mode_edit_outlined'},
+  ];
+  final List<Map<String, dynamic>> sidebarLowerItems = [
+    {'text':'Archive','icon':'Icons.archive_outlined'},
+    {'text':'Bin','icon':'Icons.delete_outline'},
   ];
 
   Icon logo(String iconName) {
@@ -39,6 +44,7 @@ class _HomeState extends State<Home> {
   bool opensidebar=true;
   bool showicontext=true;
   bool addclick=false;
+  bool isGridview=true;
   double iconsize=22;
   double titlesize=20;
   double width=40;
@@ -55,7 +61,14 @@ class _HomeState extends State<Home> {
       }
     });
   }
-
+  void toggleview(){
+    if(isGridview){
+      isGridview=false;
+    }else{
+      isGridview=true;
+    }
+    setState(() {});
+  }
   void searchbar(){
     width=160;
     iconsize=0;
@@ -66,13 +79,15 @@ class _HomeState extends State<Home> {
   void addlabel(){
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
-      setState(() {});
+      setState(() {
+        labelController.clear();
       labels.add(
-        ThButton(variant: 'plain',text: text,icon: Icon(Icons.label_important_outline),onPress: (){},)
+        ThButton(variant: 'plain',text: opensidebar?text:'',icon: Icon(Icons.label_important_outline),onPress: (){},)
       );
-      labelController.clear();
+      });
     }
-
+    FocusScope.of(context).requestFocus(focusNodelabel);
+    setState(() {});
   }
   void addnote(){
 
@@ -133,9 +148,9 @@ class _HomeState extends State<Home> {
           ), //Refresh
           IconButton(
 
-            icon: Icon(Icons.format_list_bulleted_outlined,size:18,),
+            icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size:18,):Icon(Icons.grid_view_outlined,size: 18,),
             tooltip: 'Listview',
-            onPressed: () {},
+            onPressed: toggleview,
             constraints: BoxConstraints(
               minWidth: 20,
 
@@ -217,7 +232,7 @@ class _HomeState extends State<Home> {
                                 ),
                               ),
                               if (addclick)
-                                GridView.builder(
+                                isGridview?GridView.builder(
                                   shrinkWrap: true,
                                   physics: NeverScrollableScrollPhysics(),
                                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -270,7 +285,39 @@ class _HomeState extends State<Home> {
                                       ),
                                     );
                                     },
-                                ),
+                                ):
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: items.length,
+                                  itemBuilder:(context,index){
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                      ),
+
+                                      child: Padding(
+                                        padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                        child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                              IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                            ]),
+                                      ),
+                                    );
+                                  }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
+                                )
                             ],
                           ),
                         ),
@@ -309,7 +356,7 @@ class _HomeState extends State<Home> {
                       child: Column(
                         spacing: 8,
                         children:[
-                          ThTextbox(text: 'Enter name',controller: labelController,),
+                          ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted: (x){addlabel();},),
                           Row(
                             spacing: 8,
                             children: [
@@ -383,10 +430,9 @@ class _HomeState extends State<Home> {
             },
           ),
           IconButton(
-
-            icon: Icon(Icons.format_list_bulleted_outlined,size: 20,),
-            tooltip: 'Listview',
-            onPressed: () {},
+            icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size: 20,):Icon(Icons.grid_view_outlined,size: 20,),
+            tooltip: isGridview?'Listview':'Gridview',
+            onPressed: toggleview,
             constraints: BoxConstraints(
                 minWidth: screenwidth<=990?screenwidth*0.02:20,
 
@@ -432,7 +478,7 @@ class _HomeState extends State<Home> {
                           child: Column(
                             spacing: 8,
                               children:[
-                            ThTextbox(text: 'Enter name',controller: labelController,),
+                            ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted:(x){addlabel();}),
                             Row(
                               spacing: 8,
                               children: [
@@ -489,7 +535,7 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
                                   if(addclick)
-                                    GridView.builder(
+                                    isGridview?GridView.builder(
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -530,7 +576,39 @@ class _HomeState extends State<Home> {
                                           ),
                                         );
                                       },
-                                    ),
+                                    ):
+                                  ListView.separated(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                    itemCount: items.length,
+                                      itemBuilder:(context,index){
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius: BorderRadius.circular(16),
+                                            border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                          ),
+
+                                          child: Padding(
+                                            padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                            child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                      softWrap: true,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                    ),
+                                                  ),
+                                                  Spacer(),
+                                                  IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                                  IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                ]),
+                                          ),
+                                        );
+                                      }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
+                                  )
                                 ],
                               ),
                             ),

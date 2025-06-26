@@ -27,10 +27,19 @@ class ThSideBar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children:[
-            ...upperbuttons,
-            Spacer(),
+            Expanded(
+              child: ListView(
+                children: upperbuttons,
+              ),
+            ),
+            
+
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
             Padding(padding: EdgeInsets.symmetric(horizontal: 15), child: Divider(color: Colors.grey.withAlpha((0.5*255).toInt()),thickness: 1,)),
             ...lowerbuttons,
+                ])
           ]
         ),
       ),
