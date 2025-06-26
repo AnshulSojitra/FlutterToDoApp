@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
+
 class ThButton extends StatefulWidget {
   final String text;
   final String variant;
   final Icon? icon;
   final bool onpage;
   final VoidCallback? onPress;
-  const ThButton({super.key, this.text='ok', this.variant='default',this.icon,this.onpage=false, this.onPress});
+  final double? width;
+  const ThButton({
+    super.key,
+    this.text = 'ok',
+    this.variant = 'default',
+    this.icon,
+    this.onpage = false,
+    this.onPress,
+    this.width,
+  });
 
   @override
   State<ThButton> createState() => _ThButtonState();
@@ -14,144 +24,127 @@ class ThButton extends StatefulWidget {
 class _ThButtonState extends State<ThButton> {
   @override
   Widget build(BuildContext context) {
-    var backgroundColor=Colors.transparent;
-    var foregroundColor=Colors.black;
-    var border=BorderSide(color: Colors.grey, width: 1);
-    Color hoverBackground=Colors.transparent;
-    Color hoverForeground=Colors.transparent;
-    BorderSide hoverborder=BorderSide(color: Colors.transparent, width: 1);
-    if(widget.variant=='primary'){
-      backgroundColor = Colors.deepPurpleAccent;
-      foregroundColor=Colors.white;
-      border=BorderSide(color: Colors.deepPurpleAccent, width: 1);
-      hoverborder=BorderSide(color: Colors.deepPurpleAccent.shade400, width: 1);
-      hoverForeground=Colors.white;
-      hoverBackground=Colors.deepPurpleAccent.shade400;
+    final bool isMobile = MediaQuery.of(context).size.width <= 426;
+
+    // Default styles
+    Color backgroundColor = Colors.transparent;
+    Color foregroundColor = Colors.black;
+    BorderSide border = const BorderSide(color: Colors.grey, width: 1);
+    Color hoverBackground = Colors.transparent;
+    Color hoverForeground = Colors.black;
+    BorderSide hoverBorder = const BorderSide(color: Colors.transparent, width: 1);
+
+    // Apply variant styles
+    switch (widget.variant) {
+      case 'primary':
+        backgroundColor = Colors.deepPurpleAccent;
+        foregroundColor = Colors.white;
+        border = BorderSide(color: Colors.deepPurpleAccent);
+        hoverForeground=Colors.white;
+        hoverBorder = BorderSide(color: Colors.deepPurpleAccent.shade400);
+        hoverBackground = Colors.deepPurpleAccent.shade400;
+        break;
+
+      case 'primary-outline':
+        foregroundColor = Colors.deepPurpleAccent;
+        border = BorderSide(color: Colors.deepPurpleAccent);
+        hoverBorder = BorderSide(color: Colors.deepPurpleAccent);
+        hoverBackground = Colors.deepPurpleAccent;
+        hoverForeground = Colors.white;
+        break;
+
+      case 'dark':
+        backgroundColor = Colors.black;
+        foregroundColor = Colors.white;
+        border = const BorderSide(color: Colors.black);
+        hoverBorder = const BorderSide(color: Colors.black12);
+        hoverBackground = Colors.black87;
+        break;
+
+      case 'dark-outline':
+        border = const BorderSide(color: Colors.black);
+        hoverBorder = const BorderSide(color: Colors.black);
+        hoverBackground = Colors.black;
+        hoverForeground = Colors.white;
+        break;
     }
 
-    else if(widget.variant=='primary-outline'){
-      backgroundColor = Colors.transparent;
-      foregroundColor=Colors.deepPurpleAccent;
-      border=BorderSide(color: Colors.deepPurpleAccent, width: 1);
-      hoverborder=BorderSide(color: Colors.deepPurpleAccent, width: 1);
-      hoverBackground=Colors.deepPurpleAccent;
-      hoverForeground=Colors.white;
-    }
-    else if(widget.variant=='dark'){
-      backgroundColor = Colors.black;
-      foregroundColor=Colors.white;
-      border=BorderSide(color: Colors.black, width: 1);
-      hoverborder=BorderSide(color: Colors.black12, width: 1);
-      hoverBackground=Colors.black87;
-      hoverForeground=Colors.white;
-    }
-    else if(widget.variant=='dark-outline'){
-      backgroundColor = Colors.transparent;
-      foregroundColor=Colors.black;
-      border=BorderSide(color: Colors.black, width: 1);
-      hoverborder=BorderSide(color: Colors.black, width: 1);
-      hoverBackground=Colors.black;
-      hoverForeground=Colors.white;
-    }
-    else if(widget.variant=='plain'){
-      return TextButton(
-        onPressed: () {},
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(topLeft:Radius.zero,bottomLeft:Radius.zero,topRight: Radius.circular(30),bottomRight: Radius.circular(30))
-          ),
-          foregroundColor:Colors.black, // Text + icon color
-          padding:  EdgeInsets.symmetric(horizontal:MediaQuery.of(context).size.width<=426?1: 12, vertical:MediaQuery.of(context).size.width<=426?1: 8),
-        ).copyWith(
-          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                (states) {
-              if (states.contains(WidgetState.hovered)) {
-                return Colors.black; // Hover background color
-              }
-              return widget.onpage? Colors.deepPurpleAccent:Colors.transparent;
-            },
-          ),
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                  (states) {
-                if (states.contains(WidgetState.pressed)) {
-                  return Colors.black12; // Hover background color
-                }
-                return null;
-              },
+    // Handle plain variant separately
+    if (widget.variant == 'plain') {
+      return SizedBox(
+        width: widget.width,
+        child: TextButton(
+          onPressed: widget.onPress,
+          style: TextButton.styleFrom(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.zero,
+                bottomLeft: Radius.zero,
+                topRight: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
             ),
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.hovered)) {
-              return Colors.white; // Hover: white text
-            }
-            return Colors.black;    // Default: blue text
-          }),
-          animationDuration: Duration.zero
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(MediaQuery.of(context).size.width<=426?0:10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ?widget.icon,
-              const SizedBox(width: 19),
-              Text(widget.text,style: TextStyle(fontSize: 18,fontFamily: 'RobotoFont'),),
-            ],
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 1 : 12,
+              vertical: isMobile ? 1 : 8,
+            ),
+          ).copyWith(
+            backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+              if (states.contains(MaterialState.hovered)) {
+                return Colors.black;
+              }
+              return widget.onpage ? Colors.deepPurpleAccent : Colors.transparent;
+            }),
+            overlayColor: MaterialStateProperty.all(Colors.black12),
+            foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+              if (states.contains(MaterialState.hovered)) {
+                return Colors.white;
+              }
+              return Colors.black;
+            }),
+            animationDuration: Duration.zero,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 0 : 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (widget.icon != null) widget.icon!,
+                if (widget.icon != null) const SizedBox(width: 8),
+                Text(
+                  widget.text,
+                  style: const TextStyle(fontSize: 18, fontFamily: 'RobotoFont'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
+
+    // Default button variant
     return ElevatedButton(
       onPressed: widget.onPress,
       style: ElevatedButton.styleFrom(
-        elevation: 0, // No shadow
-        backgroundColor:backgroundColor,
+        elevation: 0,
+        backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         side: border,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ).copyWith(
-          animationDuration: Duration.zero,
-        side: WidgetStateProperty.resolveWith<BorderSide>(
-              (Set<WidgetState> states) {
-            if (states.contains(WidgetState.hovered)) {
-              return hoverborder;// on hover
-            }
-            return border;   // default
-          },
+        animationDuration: Duration.zero,
+        side: MaterialStateProperty.resolveWith<BorderSide>(
+              (states) => states.contains(MaterialState.hovered) ? hoverBorder : border,
         ),
-        backgroundColor: WidgetStateProperty.resolveWith((states) {
-
-          if (states.contains(WidgetState.hovered)) {
-            return hoverBackground;// Hover: blue background
-
-          }
-          return backgroundColor;   // Default: white background
-        }),
-        overlayColor: WidgetStateProperty.resolveWith<Color?>(
-              (states) {
-            if (states.contains(WidgetState.hovered)) {
-              return Colors.transparent; // Hover background color
-            }
-            return Colors.transparent;
-          },
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (states) => states.contains(MaterialState.hovered) ? hoverBackground : backgroundColor,
         ),
-        foregroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.hovered)) {
-            return hoverForeground; // Hover: white text
-          }
-          return foregroundColor;    // Default: blue text
-        }),
-        elevation: WidgetStateProperty.resolveWith((states){
-          if(states.contains(WidgetState.hovered)){
-            return 0;
-          }
-          return 0;
-        }
-
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(
+              (states) => states.contains(MaterialState.hovered) ? hoverForeground : foregroundColor,
         ),
       ),
       child: Text(widget.text),
     );
   }
 }
-
-

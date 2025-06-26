@@ -8,6 +8,10 @@ class ThTextbox extends StatefulWidget {
   final double height;
   final Icon? prefixicon;
   final Icon? suffixicon;
+  final GestureTapCallback? onTap;
+  final FocusNode? focusNode ;
+  final TapRegionCallback? onTapOutside;
+  final TextEditingController? controller;
   const ThTextbox({
     super.key,
     this.variant = 'basic',
@@ -16,6 +20,10 @@ class ThTextbox extends StatefulWidget {
     this.height=50,
     this.prefixicon,
     this.suffixicon,
+    this.onTap,
+    this.focusNode,
+    this.onTapOutside,
+    this.controller,
   });
 
   @override
@@ -63,13 +71,17 @@ class _ThTextboxState extends State<ThTextbox> {
     // Default TextField
     return Container(
       constraints: BoxConstraints(
-        minWidth: 200,
 
-        minHeight: widget.height,
+
       ),
       width: widget.width,
       height: 40,
       child: TextField(
+
+        controller: widget.controller,
+        onTapOutside: widget.onTapOutside,
+        focusNode: widget.focusNode,
+        onTap: widget.onTap,
         obscureText: widget.variant == 'password' ? _obscureText : false,
         keyboardType: type,
         maxLines: maxLines,

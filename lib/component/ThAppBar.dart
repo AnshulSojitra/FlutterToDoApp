@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+
 
 
 class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -44,10 +44,11 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Expanded(
             child: Row(
               children: [
-                SizedBox(width: MediaQuery.of(context).size.width<=426?0:16,),
+                SizedBox(width: MediaQuery.of(context).size.width<=426?5:16,),
                 ...spaced(leftWidgets,space: MediaQuery.of(context).size.width<=426?5:MediaQuery.of(context).size.width<=990?5:16),
                 Spacer(),
-                ...spaced(space: MediaQuery.of(context).size.width<=426?0:MediaQuery.of(context).size.width<=990?0:16,vdivided(rightWidgets)),
+                ...spaced(space: MediaQuery.of(context).size.width<=426?0:MediaQuery.of(context).size.width<=990?0:16,
+                    MediaQuery.of(context).size.width<=426?rightWidgets:vdivided(rightWidgets)),
                 SizedBox(width: MediaQuery.of(context).size.width<=990?0:16,),
               ],
             ),
