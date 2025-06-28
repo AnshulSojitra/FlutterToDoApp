@@ -4,11 +4,14 @@ import 'package:untitled1/component/ThButton.dart';
 import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
+import 'package:untitled1/pages/DeletedNoteStore.dart';
+
+import 'Home.dart';
 
 class Bin extends StatefulWidget {
   final bool deleteclick;
-  final List<String>? deleteditemslist;
-  const Bin({super.key,this.deleteclick=false,this.deleteditemslist});
+  final List<String> deleteditemslist;
+  const Bin({super.key,this.deleteclick=false,required this.deleteditemslist});
 
   @override
   State<Bin> createState() => _BinState();
@@ -19,8 +22,8 @@ class _BinState extends State<Bin> {
   final TextEditingController notecontroller = TextEditingController();
   final TextEditingController labelController = TextEditingController();
   final List<String> items =[];
+  late List<String> deleteditems =[];
   final List<ThButton> labels =[];
-  final FocusNode focusNode = FocusNode();
   final FocusNode focusNode1 = FocusNode();
   final FocusNode focusNodelabel = FocusNode();
 
@@ -29,9 +32,9 @@ class _BinState extends State<Bin> {
   late int editindex;
   bool opensidebar=true;
   bool showicontext=true;
-  bool addclick=false;
+
   bool isGridview=true;
-  bool isediting=false;
+
   double iconsize=22;
   double titlesize=20;
   double width=40;
@@ -41,12 +44,18 @@ class _BinState extends State<Bin> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
-    });
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   setState(() {});
+    // });
     super.initState();
+    deleteditems=DeletedNoteStore.deletedItems;
     sidebarUpperItems=[
-      {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':true,'onPress':(){}},
+      {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':false,'onPress':(){
+        Navigator.push(context,
+        MaterialPageRoute(builder:(context)=>Home() ),
+        );
+      }},
       {'variant':'plain','text':'Reminders','icon':Icons.notifications_none_outlined,'onpage':false,'onPress':(){}},
       {'variant':'plain','text':'Edit Labels','icon':Icons.mode_edit_outlined,'onpage':false,
         'onPress':(){
@@ -82,7 +91,7 @@ class _BinState extends State<Bin> {
     ];
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
-      {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':true,'onPress':(){}},
     ];
     focusNode1.addListener(() {
       if (!focusNode1.hasFocus) {
@@ -109,42 +118,15 @@ class _BinState extends State<Bin> {
     showicontext=false;
     setState(() {});
   }
-  void addnote(){
 
-    if(MediaQuery.of(context).size.width<=426){
-      opensidebar=false;
-    }
-    String text = notecontroller.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        if(isediting){
-          items.removeAt(editindex);
-          items.insert(editindex, text);
-          isediting=false;
-        }
-        else {
-          items.add(text);
-        }// Add new item to list
-        notecontroller.clear(); // Clear text field
-        addclick = true;      // Show the list
-      });
-      FocusScope.of(context).requestFocus(focusNode);
-    }
-    setState(() {});
-  }
-  void deletenote(int index){
+  void permanentdeletenote(int index){
     setState(() {
-      items.removeAt(index);
+      DeletedNoteStore.deletedItems.removeAt(index);
+      deleteditems = List.from(DeletedNoteStore.deletedItems);
     });
 
   }
-  void editnote(int index){
-    editindex=index;
-    setState(() {
-      isediting=true;
-      notecontroller.text=items[index];
-    });
-  }
+
 
   void addlabel(){
     String text = labelController.text.trim();
@@ -194,10 +176,10 @@ class _BinState extends State<Bin> {
               tooltip: 'Refresh',
               icon: Icon(Icons.refresh,size:18,),
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Bin()),
-                );
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => const Bin(deleteditemslist: [],)),
+                // );
               },
             ), //Refresh
             IconButton(
@@ -229,50 +211,107 @@ class _BinState extends State<Bin> {
             )//Apps
           ],
         ),
-        body: Stack(
-          children: [
-            // Main Content (Row without sidebar)
-            GestureDetector(
-              onTap:(){
-
+        body: SizedBox(
+          height:  double.infinity,
+          width: double.infinity,
+          child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+            onTap: (){
+              setState(() {
                 opensidebar=false;
-                setState(() {});
-              },
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
+              });
 
+            },
+            child: Stack(
+              children: [
+                // Main Content (Row without sidebar)
+                Row(
+                  children: [
+                    Expanded(
+                      child:SingleChildScrollView(
+                        padding: EdgeInsets.all(16),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 1,
+                          ),
+                          itemCount: deleteditems.length,
+                          itemBuilder: (context, index) {
+                            return Container(
 
-                      ],
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(width: 2, color: Colors.deepPurpleAccent),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        deleteditems[index],
+                                        style: TextStyle(fontSize: 18),
+                                        softWrap: true,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 5,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        IconButton(
+                                          onPressed: (){},
+                                          icon: Icon(Icons.restore, size: 20),
+                                          tooltip: 'Edit',
+                                        ),//Edit button on note
+                                        IconButton(
+                                          onPressed: () =>permanentdeletenote(index),
+                                          icon: Icon(Icons.delete_outline, size: 20),
+                                          tooltip: 'Delete',
+                                        ),//Delete button of note
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    ),
+                  ],
+                ),
+
+                if (opensidebar)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 160,
+                      color: Colors.white.withOpacity(0.95),
+                      child: ThSideBar(
+                        width: opensidebar? screenwidth<=990?172:240:74,
+                        color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+                        upperbuttons: sidebarUpperItems.map((item){
+                          return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                        }).toList(),
+                        lowerbuttons: sidebarLowerItems.map((item){
+                          return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
-
-            if (opensidebar)
-              Positioned(
-                top: 0,
-                left: 0,
-                bottom: 0,
-                child: Container(
-                  width: 160,
-                  color: Colors.white.withOpacity(0.95),
-                  child: ThSideBar(
-                    width: opensidebar? screenwidth<=990?172:240:74,
-                    color: Colors.white70.withAlpha((0.9 * 255).toInt()),
-                    upperbuttons: sidebarUpperItems.map((item){
-                      return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
-                    }).toList(),
-                    lowerbuttons: sidebarLowerItems.map((item){
-                      return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
-                    }).toList(),
-                  ),
-                ),
-              ),
-          ],
+          ),
         ),
       );
   }
@@ -283,8 +322,10 @@ class _BinState extends State<Bin> {
     return Builder(
         builder: (context) {
           final screenwidth=MediaQuery.of(context).size.width;
-          return screenwidth<=426?android(screenwidth):
-          Scaffold(
+          if (screenwidth<=426) {
+            return android(screenwidth);
+          } else {
+            return Scaffold(
 
             backgroundColor: Colors.white,
             appBar: ThAppBar(
@@ -315,10 +356,10 @@ class _BinState extends State<Bin> {
                   tooltip: 'Refresh',
                   icon: Icon(Icons.refresh,size:20,),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Bin()),
-                    );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => const Bin(deleteditemslist: [],)),
+                    // );
                   },
                 ),
                 IconButton(
@@ -352,6 +393,7 @@ class _BinState extends State<Bin> {
             body: Stack(
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ThSideBar(
@@ -364,55 +406,73 @@ class _BinState extends State<Bin> {
                         return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
                       }).toList(),
                     ),
-                    if(widget.deleteclick)
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3, // 2 items per row
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 3, // Adjust height vs width
-                        ),
-                        itemCount: widget.deleteditemslist!.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                            ),
 
-                            child: Padding(
-                              padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                              child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(widget.deleteditemslist![index], style: TextStyle(fontSize: 18),
-                                        softWrap: true,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 5,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                    Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children:[
-                                          IconButton( icon: Icon(Icons.restore,size: 20,),tooltip: 'Restore',onPressed: (){},),
-                                          IconButton(icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',onPressed:()=> deletenote(index),)
-                                        ])
-                                  ]),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.all(16),
+                        child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: screenwidth <= 1245 ? screenwidth <=
+                                  847 ? 1 : 2 : 3, // 2 items per row
+                              crossAxisSpacing: 20,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 3, // Adjust height vs width
                             ),
-                          );
-                        },
-                      )
+                            itemCount: deleteditems.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                      width: 2, color: Colors.deepPurpleAccent),
+                                ),
+                        
+                                child: Padding(
+                                  padding: EdgeInsets.all(
+                                      screenwidth <= 847 ? 7.60 : 10),
+                                  child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            deleteditems[index],
+                                            style: TextStyle(fontSize: 18),
+                                            softWrap: true,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 5,
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        Column(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .center,
+                                            children: [
+                                              IconButton(icon: Icon(
+                                                Icons.restore, size: 20,),
+                                                tooltip: 'Restore',
+                                                onPressed: () {},),
+                                              IconButton(icon: Icon(
+                                                Icons.delete_outline, size: 20,),
+                                                tooltip: 'Delete',
+                                                onPressed: () => permanentdeletenote(index),)
+                                            ])
+                                      ]),
+                                ),
+                              );
+                            },
+                          ),
+                      ),
+                    )
 
                   ],
                 ),
               ],
             ),
           );
+          }
         }
     );
 

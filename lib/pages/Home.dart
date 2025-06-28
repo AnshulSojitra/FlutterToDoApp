@@ -4,6 +4,8 @@ import 'package:untitled1/component/ThButton.dart';
 import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
+import 'package:untitled1/pages/DeletedNoteStore.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 
 import 'Bin.dart';
 
@@ -34,6 +36,7 @@ class _HomeState extends State<Home> {
   bool isGridview=true;
   bool isediting=false;
   bool deleteclick=false;
+  bool run=false;
   double iconsize=22;
   double titlesize=20;
   double width=40;
@@ -47,6 +50,7 @@ class _HomeState extends State<Home> {
       setState(() {});
     });
     super.initState();
+    run=true;
     sidebarUpperItems=[
       {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':true,'onPress':(){}},
       {'variant':'plain','text':'Reminders','icon':Icons.notifications_none_outlined,'onpage':false,'onPress':(){}},
@@ -85,10 +89,12 @@ class _HomeState extends State<Home> {
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
       {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Bin(deleteclick: deleteclick, deleteditemslist: deleteditems,)),
-        );
+        setState(() {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Bin(deleteditemslist: DeletedNoteStore.deletedItems,)),
+          );
+        });
       }},
     ];
     focusNode1.addListener(() {
@@ -125,12 +131,12 @@ class _HomeState extends State<Home> {
     if (text.isNotEmpty) {
       setState(() {
         if(isediting){
-          items.removeAt(editindex);
-          items.insert(editindex, text);
+          NoteStore.items.removeAt(editindex);
+          NoteStore.items.insert(editindex, text);
           isediting=false;
         }
         else {
-          items.add(text);
+          NoteStore.items.add(text);
         }// Add new item to list
         notecontroller.clear(); // Clear text field
         addclick = true;      // Show the list
@@ -141,9 +147,9 @@ class _HomeState extends State<Home> {
   }
   void deletenote(int index){
     setState(() {
-      deleteclick=true;
-      deleteditems.add(items.elementAt(index));
-      items.removeAt(index);
+
+      DeletedNoteStore.deletedItems.add(NoteStore.items.elementAt(index));
+      NoteStore.items.removeAt(index);
     });
 
   }
@@ -151,7 +157,7 @@ class _HomeState extends State<Home> {
     editindex=index;
     setState(() {
       isediting=true;
-      notecontroller.text=items[index];
+      notecontroller.text=NoteStore.items[index];
     });
   }
 
@@ -294,7 +300,7 @@ class _HomeState extends State<Home> {
                                 ),
                                 ),
                               ),
-                              if (addclick)
+                              if(addclick||NoteStore.items.isNotEmpty)
                                 isGridview?GridView.builder(
                                   shrinkWrap: true,
                                   physics: NeverScrollableScrollPhysics(),
@@ -304,8 +310,9 @@ class _HomeState extends State<Home> {
                                     mainAxisSpacing: 10,
                                     childAspectRatio: 1,
                                   ),
-                                  itemCount: items.length,
+                                  itemCount: NoteStore.items.length,
                                   itemBuilder: (context, index) {
+
                                     return Container(
 
                                       decoration: BoxDecoration(
@@ -320,7 +327,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             Expanded(
                                               child: Text(
-                                                items[index],
+                                                NoteStore.items[index],
                                                 style: TextStyle(fontSize: 18),
                                                 softWrap: true,
                                                 overflow: TextOverflow.ellipsis,
@@ -352,7 +359,7 @@ class _HomeState extends State<Home> {
                                 ListView.separated(
                                   shrinkWrap: true,
                                   physics: NeverScrollableScrollPhysics(),
-                                  itemCount: items.length,
+                                  itemCount: NoteStore.items.length,
                                   itemBuilder:(context,index){
                                     return Container(
                                       decoration: BoxDecoration(
@@ -367,7 +374,7 @@ class _HomeState extends State<Home> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Expanded(
-                                                child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                child: Text(NoteStore.items[index], style: TextStyle(fontSize: 18),
                                                   softWrap: true,
                                                   overflow: TextOverflow.ellipsis,
                                                   maxLines: 1,
@@ -540,7 +547,7 @@ class _HomeState extends State<Home> {
                                           ),
                                         ),
                                       ),
-                                      if(addclick)
+                                      if(addclick||NoteStore.items.isNotEmpty)
                                         isGridview?GridView.builder(
                                           shrinkWrap: true,
                                           physics: NeverScrollableScrollPhysics(),
@@ -550,7 +557,7 @@ class _HomeState extends State<Home> {
                                             mainAxisSpacing: 10,
                                             childAspectRatio: 3, // Adjust height vs width
                                           ),
-                                          itemCount: items.length,
+                                          itemCount: NoteStore.items.length,
                                           itemBuilder: (context, index) {
                                             return Container(
                                               decoration: BoxDecoration(
@@ -565,7 +572,7 @@ class _HomeState extends State<Home> {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                   Expanded(
-                                                    child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                    child: Text(NoteStore.items[index], style: TextStyle(fontSize: 18),
                                                       softWrap: true,
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 5,
@@ -586,7 +593,7 @@ class _HomeState extends State<Home> {
                                       ListView.separated(
                                           shrinkWrap: true,
                                           physics: NeverScrollableScrollPhysics(),
-                                        itemCount: items.length,
+                                        itemCount: NoteStore.items.length,
                                           itemBuilder:(context,index){
                                             return Container(
                                               decoration: BoxDecoration(
@@ -601,7 +608,7 @@ class _HomeState extends State<Home> {
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Expanded(
-                                                        child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                        child: Text(NoteStore.items[index], style: TextStyle(fontSize: 18),
                                                           softWrap: true,
                                                           overflow: TextOverflow.ellipsis,
                                                           maxLines: 1,
