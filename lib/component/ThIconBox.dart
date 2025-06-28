@@ -24,6 +24,7 @@ class _ThIconBoxState extends State<ThIconBox> {
       width: widget.width,
       height: widget.height,
       child: TextField(
+
         focusNode: widget.focusNode ,
         onTap: widget.onTap,
         onSubmitted: widget.onSubmitted,

@@ -26,6 +26,7 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
   @override
   Widget build(BuildContext context) {
+    final double screenwidth=MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -41,17 +42,15 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
         bottom: false,
         child: SizedBox(
           height: kToolbarHeight,
-          child: Expanded(
-            child: Row(
-              children: [
-                SizedBox(width: MediaQuery.of(context).size.width<=426?5:16,),
-                ...spaced(leftWidgets,space: MediaQuery.of(context).size.width<=426?5:MediaQuery.of(context).size.width<=990?5:16),
-                Spacer(),
-                ...spaced(space: MediaQuery.of(context).size.width<=426?0:MediaQuery.of(context).size.width<=990?0:16,
-                    MediaQuery.of(context).size.width<=426?rightWidgets:vdivided(rightWidgets)),
-                SizedBox(width: MediaQuery.of(context).size.width<=990?0:16,),
-              ],
-            ),
+          child: Row(
+            children: [
+              SizedBox(width: screenwidth<=426?0:16,),
+              ...spaced(leftWidgets,space: screenwidth<=426?0:screenwidth<=990?5:16),
+              Spacer(),
+              ...spaced(space:screenwidth<=426?0:screenwidth<=990?0:16,
+                  screenwidth<=426?rightWidgets:vdivided(rightWidgets)),
+              SizedBox(width: screenwidth<=990?0:16,),
+            ],
           ),
         ),
       ),

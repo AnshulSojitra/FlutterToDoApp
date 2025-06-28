@@ -5,6 +5,8 @@ import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 
+import 'Bin.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -14,9 +16,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String currentUserRole = "admin";
-  final TextEditingController myController = TextEditingController();
+  final TextEditingController notecontroller = TextEditingController();
   final TextEditingController labelController = TextEditingController();
   final List<String> items =[];
+  final List<String> deleteditems =[];
   final List<ThButton> labels =[];
   final FocusNode focusNode = FocusNode();
   final FocusNode focusNode1 = FocusNode();
@@ -24,16 +27,13 @@ class _HomeState extends State<Home> {
 
 
 
-  Icon logo(String iconName) {
-    if (iconName == "home") return Icon(Icons.dashboard);
-    if (iconName == "person") return Icon(Icons.person);
-    if (iconName == "settings") return Icon(Icons.settings);
-    return Icon(Icons.dashboard);
-  }
+  late int editindex;
   bool opensidebar=true;
   bool showicontext=true;
   bool addclick=false;
   bool isGridview=true;
+  bool isediting=false;
+  bool deleteclick=false;
   double iconsize=22;
   double titlesize=20;
   double width=40;
@@ -43,6 +43,9 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
     super.initState();
     sidebarUpperItems=[
       {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':true,'onPress':(){}},
@@ -57,7 +60,12 @@ class _HomeState extends State<Home> {
                 child: Column(
                     spacing: 8,
                     children:[
-                      ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,onSubmitted:(x){addlabel();}),
+                      ThTextbox(text: 'Enter name',controller: labelController,focusNode:focusNodelabel,
+                          onSubmitted:(x){
+                            addlabel();
+                            FocusScope.of(context).requestFocus(focusNodelabel);
+                            setState(() {});
+                      }),
                       Row(
                         spacing: 8,
                         children: [
@@ -76,7 +84,12 @@ class _HomeState extends State<Home> {
     ];
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
-      {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Bin(deleteclick: deleteclick, deleteditemslist: deleteditems,)),
+        );
+      }},
     ];
     focusNode1.addListener(() {
       if (!focusNode1.hasFocus) {
@@ -103,41 +116,60 @@ class _HomeState extends State<Home> {
     showicontext=false;
     setState(() {});
   }
-
   void addnote(){
 
     if(MediaQuery.of(context).size.width<=426){
       opensidebar=false;
     }
-    String text = myController.text.trim();
+    String text = notecontroller.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        items.add(text);   // Add new item to list
-        myController.clear(); // Clear text field
+        if(isediting){
+          items.removeAt(editindex);
+          items.insert(editindex, text);
+          isediting=false;
+        }
+        else {
+          items.add(text);
+        }// Add new item to list
+        notecontroller.clear(); // Clear text field
         addclick = true;      // Show the list
       });
       FocusScope.of(context).requestFocus(focusNode);
     }
     setState(() {});
   }
+  void deletenote(int index){
+    setState(() {
+      deleteclick=true;
+      deleteditems.add(items.elementAt(index));
+      items.removeAt(index);
+    });
 
+  }
+  void editnote(int index){
+    editindex=index;
+    setState(() {
+      isediting=true;
+      notecontroller.text=items[index];
+    });
+  }
 
   void addlabel(){
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        labelController.clear();
         sidebarUpperItems.add(
             {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
-            // ThButton(variant: 'plain',text: opensidebar?text:'',icon: Icon(Icons.label_important_outline),onPress: (){},)
         );
+        labelController.clear();
       });
+      FocusScope.of(context).requestFocus(focusNodelabel);
     }
-    FocusScope.of(context).requestFocus(focusNodelabel);
     setState(() {});
   }
-  Widget android(){
-    final screenwidth=MediaQuery.of(context).size.width;
+  Widget android(double screenwidth){
+
   return
     Scaffold(
       backgroundColor: Colors.white,
@@ -234,12 +266,12 @@ class _HomeState extends State<Home> {
                                 focusNode: focusNode,
                                 onTap:(){opensidebar=false;setState(() {});},
                                 onSubmitted: (value) => addnote(),
-                                controller: myController,
+                                controller: notecontroller,
                                 text: 'Take a note',
                                 width: 700,
                                 height: 60,
                                 sufixicons: SizedBox(
-                                width: 80,
+                                width: 96,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -249,7 +281,7 @@ class _HomeState extends State<Home> {
                                       tooltip: 'Add note',
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.image_outlined),
+                                      icon: Icon(Icons.image_outlined,),
                                       tooltip: 'Add image',
                                       onPressed: () {
                                         if(MediaQuery.of(context).size.width<=426){
@@ -300,12 +332,12 @@ class _HomeState extends State<Home> {
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 IconButton(
-                                                  onPressed: () {},
+                                                  onPressed: ()=>editnote(index),
                                                   icon: Icon(Icons.edit_outlined, size: 20),
                                                   tooltip: 'Edit',
                                                 ),//Edit button on note
                                                 IconButton(
-                                                  onPressed: () {},
+                                                  onPressed: () =>deletenote(index),
                                                   icon: Icon(Icons.delete_outline, size: 20),
                                                   tooltip: 'Delete',
                                                 ),//Delete button of note
@@ -391,211 +423,216 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 
-    final screenwidth=MediaQuery.of(context).size.width;
-    return screenwidth<=426?android():
-    Scaffold(
 
-      backgroundColor: Colors.white,
-      appBar: ThAppBar(
-        leftWidgets: [
-          IconButton(icon:Icon(Icons.featured_play_list,size:  screenwidth<=990?20:30,),onPressed: (){
-            if(opensidebar==true){
-              opensidebar=false;
-            }else{
-              opensidebar=true;
-            }
-            setState(() {});
-          },),
-          Text('Keep', style: TextStyle(fontSize:  screenwidth<=990?16:25, fontFamily: 'GilroyFont')),
-          // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
-          ThTextbox(
-            width: screenwidth<=990?screenwidth*0.3:400,
-            height: 40,
-            text: 'Search',
-            prefixicon: Icon(Icons.search),
-          )
-        ],
-        rightWidgets: [
-          IconButton(
-            constraints: BoxConstraints(
-                minWidth: screenwidth<=990?screenwidth*0.04:20,
-                minHeight: screenwidth<=990?screenwidth*0.02:20,
-            ),
-            tooltip: 'Refresh',
-            icon: Icon(Icons.refresh,size:20,),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const Home()),
-              );
-            },
-          ),
-          IconButton(
-            icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size: 20,):Icon(Icons.grid_view_outlined,size: 20,),
-            tooltip: isGridview?'Listview':'Gridview',
-            onPressed: toggleview,
-            constraints: BoxConstraints(
-                minWidth: screenwidth<=990?screenwidth*0.02:20,
+    return Builder(
+      builder: (context) {
+        final screenwidth=MediaQuery.of(context).size.width;
+        return screenwidth<=426?android(screenwidth):
+        Scaffold(
 
-            ),
-          ),
-          IconButton(
-            icon: Icon(Icons.settings_outlined,size:20,),
-            tooltip: 'Settings',
-            onPressed: () {},
-            constraints: BoxConstraints(
-              minWidth: screenwidth<=990?screenwidth*0.02:20,
-            ),
-          ),
-          IconButton(
-            icon: Icon(Icons.apps,size:20,),
-            tooltip: 'Apps',
-            onPressed: () {},
-            constraints: BoxConstraints(
-              minWidth: screenwidth<=990?screenwidth*0.02:20,
-
-            ),
-          )
-        ],
-      ),
-      body: Stack(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ThSideBar(
-                width: opensidebar? screenwidth<=990?172:240:74,
-                color: Colors.white70.withAlpha((0.9 * 255).toInt()),
-                upperbuttons: sidebarUpperItems.map((item){
-                  return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
-                }).toList(),
-                lowerbuttons: sidebarLowerItems.map((item){
-                  return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
-                }).toList(),
+          backgroundColor: Colors.white,
+          appBar: ThAppBar(
+            leftWidgets: [
+              IconButton(icon:Icon(Icons.featured_play_list,size:  screenwidth<=990?20:30,),onPressed: (){
+                if(opensidebar==true){
+                  opensidebar=false;
+                }else{
+                  opensidebar=true;
+                }
+                setState(() {});
+              },),
+              Text('Keep', style: TextStyle(fontSize:  screenwidth<=990?16:25, fontFamily: 'GilroyFont')),
+              // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
+              ThTextbox(
+                width: screenwidth<=990?screenwidth*0.3:400,
+                height: 40,
+                text: 'Search',
+                prefixicon: Icon(Icons.search),
+              )
+            ],
+            rightWidgets: [
+              IconButton(
+                constraints: BoxConstraints(
+                    minWidth: screenwidth<=990?screenwidth*0.04:20,
+                    minHeight: screenwidth<=990?screenwidth*0.02:20,
+                ),
+                tooltip: 'Refresh',
+                icon: Icon(Icons.refresh,size:20,),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                  );
+                },
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                        child: SingleChildScrollView(
-                          child: Padding(
-                            padding: EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  ThIconBox(
-                                    focusNode: focusNode,
-                                    onSubmitted: (value){addnote();},
-                                    controller: myController,
-                                    text: 'Take a note',
-                                    width: 700,
-                                    height: 60,
-                                    sufixicons: SizedBox(
-                                      width: 80,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          IconButton(icon: Icon(Icons.add), onPressed:addnote,tooltip: 'Add note',),
-                                          IconButton(icon: Icon(Icons.image_outlined), tooltip: 'Add image',onPressed: () {
-                                          }),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if(addclick)
-                                    isGridview?GridView.builder(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3, // 2 items per row
-                                        crossAxisSpacing: 20,
-                                        mainAxisSpacing: 10,
-                                        childAspectRatio: 3, // Adjust height vs width
-                                      ),
-                                      itemCount: items.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(16),
-                                            border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                                          ),
+              IconButton(
+                icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size: 20,):Icon(Icons.grid_view_outlined,size: 20,),
+                tooltip: isGridview?'Listview':'Gridview',
+                onPressed: toggleview,
+                constraints: BoxConstraints(
+                    minWidth: screenwidth<=990?screenwidth*0.02:20,
 
-                                          child: Padding(
-                                            padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                              Expanded(
-                                                child: Text(items[index], style: TextStyle(fontSize: 18),
-                                                  softWrap: true,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  maxLines: 5,
-                                                ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.settings_outlined,size:20,),
+                tooltip: 'Settings',
+                onPressed: () {},
+                constraints: BoxConstraints(
+                  minWidth: screenwidth<=990?screenwidth*0.02:20,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.apps,size:20,),
+                tooltip: 'Apps',
+                onPressed: () {},
+                constraints: BoxConstraints(
+                  minWidth: screenwidth<=990?screenwidth*0.02:20,
+
+                ),
+              )
+            ],
+          ),
+          body: Stack(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ThSideBar(
+                    width: opensidebar? screenwidth<=990?172:240:74,
+                    color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+                    upperbuttons: sidebarUpperItems.map((item){
+                      return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                    }).toList(),
+                    lowerbuttons: sidebarLowerItems.map((item){
+                      return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
+                    }).toList(),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.all(15),
+                                child: Center(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      ThIconBox(
+                                        focusNode: focusNode,
+                                        onSubmitted: (value){addnote();},
+                                        controller: notecontroller,
+                                        text: 'Take a note',
+                                        width: 700,
+                                        height: 60,
+                                        sufixicons: SizedBox(
+                                          width: 80,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              IconButton(icon: Icon(Icons.add), onPressed:addnote,tooltip: 'Add note',),
+                                              IconButton(icon: Icon(Icons.image_outlined), tooltip: 'Add image',onPressed: () {
+                                              }),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if(addclick)
+                                        isGridview?GridView.builder(
+                                          shrinkWrap: true,
+                                          physics: NeverScrollableScrollPhysics(),
+                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3, // 2 items per row
+                                            crossAxisSpacing: 20,
+                                            mainAxisSpacing: 10,
+                                            childAspectRatio: 3, // Adjust height vs width
+                                          ),
+                                          itemCount: items.length,
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(width: 2,color: Colors.deepPurpleAccent),
                                               ),
-                                              Spacer(),
-                                              Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                  children:[
-                                                IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                                IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
-                                              ])
-                                            ]),
-                                          ),
-                                        );
-                                      },
-                                    ):
-                                  ListView.separated(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                    itemCount: items.length,
-                                      itemBuilder:(context,index){
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            borderRadius: BorderRadius.circular(16),
-                                            border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                                          ),
 
-                                          child: Padding(
-                                            padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                                            child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
+                                              child: Padding(
+                                                padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
                                                   Expanded(
                                                     child: Text(items[index], style: TextStyle(fontSize: 18),
                                                       softWrap: true,
                                                       overflow: TextOverflow.ellipsis,
-                                                      maxLines: 1,
+                                                      maxLines: 5,
                                                     ),
                                                   ),
                                                   Spacer(),
-                                                  IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                                  IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                  Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                      children:[
+                                                    IconButton( icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',onPressed: ()=>editnote(index),),
+                                                    IconButton(icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',onPressed:()=> deletenote(index),)
+                                                  ])
                                                 ]),
-                                          ),
-                                        );
-                                      }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
-                                  )
-                                ],
+                                              ),
+                                            );
+                                          },
+                                        ):
+                                      ListView.separated(
+                                          shrinkWrap: true,
+                                          physics: NeverScrollableScrollPhysics(),
+                                        itemCount: items.length,
+                                          itemBuilder:(context,index){
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                borderRadius: BorderRadius.circular(16),
+                                                border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                              ),
+
+                                              child: Padding(
+                                                padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                                child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(items[index], style: TextStyle(fontSize: 18),
+                                                          softWrap: true,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 1,
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                                      IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                    ]),
+                                              ),
+                                            );
+                                          }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+
+                      ],
                     ),
+                  ),
 
-                  ],
-                ),
+                ],
               ),
-
             ],
           ),
-        ],
-      ),
+        );
+      }
     );
 
   }

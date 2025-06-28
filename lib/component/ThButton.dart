@@ -111,9 +111,12 @@ class _ThButtonState extends State<ThButton> {
               children: [
                 if (widget.icon != null) widget.icon!,
                 if (widget.icon != null) const SizedBox(width: 8),
-                Text(
-                  widget.text,
-                  style: const TextStyle(fontSize: 18, fontFamily: 'RobotoFont'),
+                Expanded(
+                  child: Text(
+                    widget.text,
+                    style: const TextStyle(fontSize: 18, fontFamily: 'RobotoFont'),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
