@@ -5,6 +5,7 @@ import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 import 'package:untitled1/pages/DeletedNoteStore.dart';
+import 'package:untitled1/pages/LabelStore.dart';
 
 import 'Home.dart';
 
@@ -88,6 +89,7 @@ class _BinState extends State<Bin> {
             );
           });
         }},
+      ...LabelStore.labels
     ];
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
@@ -132,6 +134,7 @@ class _BinState extends State<Bin> {
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
+        LabelStore.labels.add({'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
         sidebarUpperItems.add(
             {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
         );

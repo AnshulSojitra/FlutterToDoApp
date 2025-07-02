@@ -5,6 +5,7 @@ import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 import 'package:untitled1/pages/DeletedNoteStore.dart';
+import 'package:untitled1/pages/LabelStore.dart';
 import 'package:untitled1/pages/NoteStore.dart';
 
 import 'Bin.dart';
@@ -20,6 +21,7 @@ class _HomeState extends State<Home> {
   String currentUserRole = "admin";
   final TextEditingController notecontroller = TextEditingController();
   final TextEditingController labelController = TextEditingController();
+  late PageController pageController;
   final List<String> items =[];
   final List<String> deleteditems =[];
   final List<ThButton> labels =[];
@@ -28,8 +30,8 @@ class _HomeState extends State<Home> {
   final FocusNode focusNodelabel = FocusNode();
 
 
-
   late int editindex;
+  int currentpageindex=0;
   bool opensidebar=true;
   bool showicontext=true;
   bool addclick=false;
@@ -41,6 +43,7 @@ class _HomeState extends State<Home> {
   double titlesize=20;
   double width=40;
   late List<Map<String, dynamic>> sidebarUpperItems=[];
+  late List<Map<String, dynamic>> sidebarUpperItemsx=[];
   late List<Map<String, dynamic>> sidebarLowerItems=[];
 
 
@@ -85,6 +88,7 @@ class _HomeState extends State<Home> {
             );
           });
         }},
+      ...LabelStore.labels
     ];
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
@@ -107,6 +111,7 @@ class _HomeState extends State<Home> {
       }
     });
   }
+
   void toggleview(){
     if(isGridview){
       isGridview=false;
@@ -165,6 +170,7 @@ class _HomeState extends State<Home> {
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
+        LabelStore.labels.add( {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
         sidebarUpperItems.add(
             {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
         );
@@ -429,8 +435,6 @@ class _HomeState extends State<Home> {
   }
   @override
   Widget build(BuildContext context) {
-
-
     return Builder(
       builder: (context) {
         final screenwidth=MediaQuery.of(context).size.width;
