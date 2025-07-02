@@ -45,7 +45,7 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               SizedBox(width: screenwidth<=426?0:16,),
-              ...spaced(leftWidgets,space: screenwidth<=426?0:screenwidth<=990?5:16),
+              ...spaced(leftWidgets,space: screenwidth<=426?5:screenwidth<=990?5:16),
               Spacer(),
               ...spaced(space:screenwidth<=426?0:screenwidth<=990?0:16,
                   screenwidth<=426?rightWidgets:vdivided(rightWidgets)),

@@ -88,15 +88,15 @@ class _HomeState extends State<Home> {
             );
           });
         }},
-      ...LabelStore.labels
+      ...NoteStore.labels
     ];
     sidebarLowerItems=[
-      {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Settings','icon':Icons.settings_outlined,'onpage':false,'onPress':(){}},
       {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){
         setState(() {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => Bin(deleteditemslist: DeletedNoteStore.deletedItems,)),
+            MaterialPageRoute(builder: (context) => Bin(deleteditemslist: NoteStore.deletedItems,)),
           );
         });
       }},
@@ -152,8 +152,7 @@ class _HomeState extends State<Home> {
   }
   void deletenote(int index){
     setState(() {
-
-      DeletedNoteStore.deletedItems.add(NoteStore.items.elementAt(index));
+      NoteStore.deletedItems.add(NoteStore.items.elementAt(index));
       NoteStore.items.removeAt(index);
     });
 
@@ -170,7 +169,7 @@ class _HomeState extends State<Home> {
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        LabelStore.labels.add( {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
+        NoteStore.labels.add( {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
         sidebarUpperItems.add(
             {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
         );
@@ -181,7 +180,7 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
   Widget android(double screenwidth){
-
+  final double screenheight=MediaQuery.of(context).size.height;
   return
     Scaffold(
       backgroundColor: Colors.white,
@@ -231,14 +230,7 @@ class _HomeState extends State<Home> {
 
             ),
           ),//ListView
-          IconButton(
-            icon: Icon(Icons.settings_outlined,size:18,),
-            tooltip: 'Settings',
-            onPressed: () {},
-            constraints: BoxConstraints(
-              minWidth:20,
-            ),
-          ),//Settings
+          //Settings
           IconButton(
             icon: Icon(Icons.apps,size:18,),
             tooltip: 'Apps',
@@ -306,6 +298,22 @@ class _HomeState extends State<Home> {
                                 ),
                                 ),
                               ),
+                              if(NoteStore.items.isEmpty)
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.lightbulb_outline,size: 100,color: Colors.black.withOpacity(0.1),),
+                                      Text('Notes that you add appear here',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black.withOpacity(0.6)
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               if(addclick||NoteStore.items.isNotEmpty)
                                 isGridview?GridView.builder(
                                   shrinkWrap: true,
@@ -350,7 +358,7 @@ class _HomeState extends State<Home> {
                                                   tooltip: 'Edit',
                                                 ),//Edit button on note
                                                 IconButton(
-                                                  onPressed: () =>deletenote(index),
+                                                  onPressed: isediting?(){}: () =>deletenote(index),
                                                   icon: Icon(Icons.delete_outline, size: 20),
                                                   tooltip: 'Delete',
                                                 ),//Delete button of note
@@ -387,8 +395,8 @@ class _HomeState extends State<Home> {
                                                 ),
                                               ),
                                               Spacer(),
-                                              IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                              IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                              IconButton(onPressed: ()=>editnote(index), icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                              IconButton(onPressed: isediting?(){}:()=>deletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
                                             ]),
                                       ),
                                     );
@@ -438,6 +446,7 @@ class _HomeState extends State<Home> {
     return Builder(
       builder: (context) {
         final screenwidth=MediaQuery.of(context).size.width;
+        final screenheight=MediaQuery.of(context).size.height;
         return screenwidth<=426?android(screenwidth):
         Scaffold(
 
@@ -452,7 +461,7 @@ class _HomeState extends State<Home> {
                 }
                 setState(() {});
               },),
-              Text('Keep', style: TextStyle(fontSize:  screenwidth<=990?16:25, fontFamily: 'GilroyFont')),
+              Text('Keep', style: TextStyle(fontSize:  screenwidth<=990?22:25, fontFamily: 'GilroyFont')),
               // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
               ThTextbox(
                 width: screenwidth<=990?screenwidth*0.3:400,
@@ -483,14 +492,6 @@ class _HomeState extends State<Home> {
                 constraints: BoxConstraints(
                     minWidth: screenwidth<=990?screenwidth*0.02:20,
 
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.settings_outlined,size:20,),
-                tooltip: 'Settings',
-                onPressed: () {},
-                constraints: BoxConstraints(
-                  minWidth: screenwidth<=990?screenwidth*0.02:20,
                 ),
               ),
               IconButton(
@@ -551,6 +552,23 @@ class _HomeState extends State<Home> {
                                           ),
                                         ),
                                       ),
+                                      if(NoteStore.items.isEmpty)
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.lightbulb_outline,size: 100,color: Colors.black.withOpacity(0.1),),
+                                              Text('Notes that you add appear here',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize:screenwidth<=545?20: 24,
+                                                    color: Colors.black.withOpacity(0.6)
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
                                       if(addclick||NoteStore.items.isNotEmpty)
                                         isGridview?GridView.builder(
                                           shrinkWrap: true,
@@ -587,7 +605,7 @@ class _HomeState extends State<Home> {
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                       children:[
                                                     IconButton( icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',onPressed: ()=>editnote(index),),
-                                                    IconButton(icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',onPressed:()=> deletenote(index),)
+                                                    IconButton(icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',onPressed:isediting?(){}: ()=> deletenote(index),)
                                                   ])
                                                 ]),
                                               ),
@@ -619,8 +637,8 @@ class _HomeState extends State<Home> {
                                                         ),
                                                       ),
                                                       Spacer(),
-                                                      IconButton(onPressed: (){}, icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                                      IconButton(onPressed: (){}, icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                      IconButton(onPressed: ()=>editnote(index), icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                                      IconButton(onPressed: ()=>deletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
                                                     ]),
                                               ),
                                             );

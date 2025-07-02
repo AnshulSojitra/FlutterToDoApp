@@ -88,6 +88,7 @@ class _ThButtonState extends State<ThButton> {
               horizontal: isMobile ? 1 : 12,
               vertical: isMobile ? 1 : 8,
             ),
+
           ).copyWith(
             backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
               if (states.contains(MaterialState.hovered)) {
