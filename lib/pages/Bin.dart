@@ -6,7 +6,6 @@ import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 import 'package:untitled1/pages/DeletedNoteStore.dart';
 import 'package:untitled1/pages/LabelStore.dart';
-import 'package:untitled1/pages/NoteStore.dart';
 
 import 'Home.dart';
 
@@ -51,7 +50,7 @@ class _BinState extends State<Bin> {
     //   setState(() {});
     // });
     super.initState();
-    deleteditems=NoteStore.deletedItems;
+    deleteditems=DeletedNoteStore.deletedItems;
     sidebarUpperItems=[
       {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':false,'onPress':(){
         Navigator.push(context,
@@ -90,7 +89,7 @@ class _BinState extends State<Bin> {
             );
           });
         }},
-      ...NoteStore.labels
+      ...LabelStore.labels
     ];
     sidebarLowerItems=[
       {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
@@ -124,23 +123,18 @@ class _BinState extends State<Bin> {
 
   void permanentdeletenote(int index){
     setState(() {
-      NoteStore.deletedItems.removeAt(index);
-      deleteditems = List.from(NoteStore.deletedItems);
+      DeletedNoteStore.deletedItems.removeAt(index);
+      deleteditems = List.from(DeletedNoteStore.deletedItems);
     });
 
   }
 
-  void restorenote(int index){
-    setState(() {
-      NoteStore.items.add(NoteStore.deletedItems[index]);
-      NoteStore.deletedItems.removeAt(index);
-    });
-  }
+
   void addlabel(){
     String text = labelController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        NoteStore.labels.add({'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
+        LabelStore.labels.add({'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
         sidebarUpperItems.add(
             {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
         );
@@ -165,7 +159,7 @@ class _BinState extends State<Bin> {
               }
               setState(() {});
             },):null,
-            showicontext?Text('Bin', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
+            showicontext?Text('Keep', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
 
             ThTextbox(
               focusNode: focusNode1,
@@ -234,18 +228,12 @@ class _BinState extends State<Bin> {
             child: Stack(
               children: [
                 // Main Content (Row without sidebar)
-                NoteStore.deletedItems.isEmpty?
-                    Expanded(
-                        child: Center(
-                          child: Text('The bin is empty')
-                        )
-                    )
-                    :Row(
+                Row(
                   children: [
                     Expanded(
                       child:SingleChildScrollView(
                         padding: EdgeInsets.all(16),
-                        child: isGridview?GridView.builder(
+                        child: GridView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -282,7 +270,7 @@ class _BinState extends State<Bin> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         IconButton(
-                                          onPressed: ()=>restorenote(index),
+                                          onPressed: (){},
                                           icon: Icon(Icons.restore, size: 20),
                                           tooltip: 'Edit',
                                         ),//Edit button on note
@@ -298,40 +286,7 @@ class _BinState extends State<Bin> {
                               ),
                             );
                           },
-                        ):
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: NoteStore.deletedItems.length,
-                          itemBuilder:(context,index){
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                              ),
-
-                              child: Padding(
-                                padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                                child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Text(NoteStore.deletedItems[index], style: TextStyle(fontSize: 18),
-                                          softWrap: true,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      IconButton(onPressed: ()=>restorenote(index), icon: Icon(Icons.restore,size: 20,),tooltip: 'Restore',),
-                                      IconButton(onPressed: ()=>permanentdeletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Permanent Delete',)
-                                    ]),
-                              ),
-                            );
-                          }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
-                        )
-                        ,
+                        ),
                       )
                     ),
                   ],
@@ -386,7 +341,7 @@ class _BinState extends State<Bin> {
                   }
                   setState(() {});
                 },),
-                Text('Bin', style: TextStyle(fontSize:  screenwidth<=990?22:25, fontFamily: 'GilroyFont')),
+                Text('Keep', style: TextStyle(fontSize:  screenwidth<=990?16:25, fontFamily: 'GilroyFont')),
                 // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
                 ThTextbox(
                   width: screenwidth<=990?screenwidth*0.3:400,
@@ -455,16 +410,10 @@ class _BinState extends State<Bin> {
                       }).toList(),
                     ),
 
-                    NoteStore.deletedItems.isEmpty?
-                        Expanded(
-                          child: Center(
-                            child: Text('The bin is empty'),
-                          ),
-                        )
-                        :Expanded(
+                    Expanded(
                       child: SingleChildScrollView(
                         padding: EdgeInsets.all(16),
-                        child: isGridview?GridView.builder(
+                        child: GridView.builder(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -507,7 +456,7 @@ class _BinState extends State<Bin> {
                                               IconButton(icon: Icon(
                                                 Icons.restore, size: 20,),
                                                 tooltip: 'Restore',
-                                                onPressed: () =>restorenote(index),),
+                                                onPressed: () {},),
                                               IconButton(icon: Icon(
                                                 Icons.delete_outline, size: 20,),
                                                 tooltip: 'Delete',
@@ -517,39 +466,7 @@ class _BinState extends State<Bin> {
                                 ),
                               );
                             },
-                          ):
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: NoteStore.deletedItems.length,
-                          itemBuilder:(context,index){
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                              ),
-
-                              child: Padding(
-                                padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                                child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Text(NoteStore.deletedItems[index], style: TextStyle(fontSize: 18),
-                                          softWrap: true,
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      IconButton(onPressed: ()=>restorenote(index), icon: Icon(Icons.restore,size: 20,),tooltip: 'Restore',),
-                                      IconButton(onPressed: ()=>permanentdeletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
-                                    ]),
-                              ),
-                            );
-                          }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
-                        ),
+                          ),
                       ),
                     )
 
