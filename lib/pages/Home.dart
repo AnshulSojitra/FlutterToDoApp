@@ -392,9 +392,7 @@ class _HomeState extends State<Home> {
                                           ),
                                           itemCount: isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,
                                           itemBuilder: (context, index) {
-
                                             return Container(
-
                                               decoration: BoxDecoration(
                                                 color: Colors.transparent,
                                                 borderRadius: BorderRadius.circular(16),
@@ -448,7 +446,7 @@ class _HomeState extends State<Home> {
                                         ListView.separated(
                                           shrinkWrap: true,
                                           physics: NeverScrollableScrollPhysics(),
-                                          itemCount: NoteStore.items.length,
+                                          itemCount: isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,
                                           itemBuilder:(context,index){
                                             return Container(
                                               decoration: BoxDecoration(
@@ -463,15 +461,30 @@ class _HomeState extends State<Home> {
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Expanded(
-                                                        child: Text(NoteStore.items[index], style: TextStyle(fontSize: 18),
+                                                        child: Text(isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],style: TextStyle(fontSize: 18),
                                                           softWrap: true,
                                                           overflow: TextOverflow.ellipsis,
                                                           maxLines: 1,
                                                         ),
                                                       ),
                                                       Spacer(),
-                                                      IconButton(onPressed: ()=>editnote(index), icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                                      IconButton(onPressed: isediting?(){}:()=>deletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                      IconButton(
+                                                        onPressed: ()=>editnote(NoteStore.filteredIndex.length>0?NoteStore.filteredIndex[index]:index),
+                                                        icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',
+                                                        onPressed:isediting?(){}: (){
+                                                          if (isSearching && index < NoteStore.filteredIndex.length) {
+                                                            // Get the ACTUAL original index from the filteredIndex
+                                                            int originalIndexToDelete = NoteStore.filteredIndex[index];
+                                                            deletenote(originalIndexToDelete);
+                                                          } else if (!isSearching && index < NoteStore.items.length) {
+                                                            // If not searching, the 'index' from GridView/ListView IS the original index
+                                                            deletenote(index);
+                                                          }
+                                                        },
+                                                      )
                                                     ]),
                                               ),
                                             );
@@ -733,7 +746,7 @@ class _HomeState extends State<Home> {
                                       ListView.separated(
                                           shrinkWrap: true,
                                           physics: NeverScrollableScrollPhysics(),
-                                        itemCount: NoteStore.items.length,
+                                        itemCount: isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,
                                           itemBuilder:(context,index){
                                             return Container(
                                               decoration: BoxDecoration(
@@ -748,15 +761,24 @@ class _HomeState extends State<Home> {
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Expanded(
-                                                        child: Text(NoteStore.items[index], style: TextStyle(fontSize: 18),
+                                                        child: Text(isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],
                                                           softWrap: true,
                                                           overflow: TextOverflow.ellipsis,
                                                           maxLines: 1,
                                                         ),
                                                       ),
                                                       Spacer(),
-                                                      IconButton(onPressed: ()=>editnote(index), icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
-                                                      IconButton(onPressed: ()=>deletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',)
+                                                      IconButton(onPressed: ()=>editnote(NoteStore.filteredIndex.length>0?NoteStore.filteredIndex[index]:index), icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',),
+                                                      IconButton( icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',onPressed:isediting?(){}: (){
+                                                        if (isSearching && index < NoteStore.filteredIndex.length) {
+                                                          // Get the ACTUAL original index from the filteredIndex
+                                                          int originalIndexToDelete = NoteStore.filteredIndex[index];
+                                                          deletenote(originalIndexToDelete);
+                                                        } else if (!isSearching && index < NoteStore.items.length) {
+                                                          // If not searching, the 'index' from GridView/ListView IS the original index
+                                                          deletenote(index);
+                                                        }
+                                                      },)
                                                     ]),
                                               ),
                                             );
