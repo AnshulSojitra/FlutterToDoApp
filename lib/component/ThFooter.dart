@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-
-
-
 class ThFooter extends StatelessWidget implements PreferredSizeWidget {
 
   final List<Widget> rightWidgets;
   final List<Widget> leftWidgets;
-  const ThFooter({super.key,this.rightWidgets=const [],this.leftWidgets=const []});
+  const ThFooter({super.key,this.rightWidgets=const [],this.leftWidgets=const [],});
   List<Widget> spaced(List<Widget> widgets, {double space = 16}) {
     return [
       for (int i = 0; i < widgets.length; i++) ...[

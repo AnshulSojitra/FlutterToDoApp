@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
+import 'package:untitled1/component/ThFooter.dart';
 import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
@@ -151,6 +152,18 @@ class _BinState extends State<Bin> {
 
     return
       Scaffold(
+        bottomNavigationBar: ThFooter(
+          rightWidgets: [
+            ThButton(
+              variant: 'primary',
+              text: 'Empty bin',
+              onPress: (){
+                setState(() {
+                  NoteStore.deletedItems.clear();
+                });
+              },
+            )
+        ],),
         backgroundColor: Colors.white,
         appBar: ThAppBar(
           leftWidgets: [
@@ -355,8 +368,6 @@ class _BinState extends State<Bin> {
   }
   @override
   Widget build(BuildContext context) {
-
-
     return Builder(
         builder: (context) {
           final screenwidth=MediaQuery.of(context).size.width;
@@ -364,8 +375,19 @@ class _BinState extends State<Bin> {
             return android(screenwidth);
           } else {
             return Scaffold(
-
             backgroundColor: Colors.white,
+              bottomNavigationBar: ThFooter(
+                rightWidgets: [
+                  ThButton(
+                    variant: 'primary',
+                    text: 'Empty bin',
+                    onPress: (){
+                      setState(() {
+                        NoteStore.deletedItems.clear();
+                      });
+                    },
+                  )
+                ],),
             appBar: ThAppBar(
               leftWidgets: [
                 IconButton(icon:Icon(Icons.featured_play_list,size:  screenwidth<=990?20:30,),onPressed: (){
