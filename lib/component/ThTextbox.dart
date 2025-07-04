@@ -13,6 +13,7 @@ class ThTextbox extends StatefulWidget {
   final TapRegionCallback? onTapOutside;
   final TextEditingController? controller;
   final Function(String)?  onSubmitted;
+  final ValueChanged<String>? onChanged;
   const ThTextbox({
     super.key,
     this.variant = 'basic',
@@ -26,6 +27,7 @@ class ThTextbox extends StatefulWidget {
     this.onTapOutside,
     this.controller,
     this.onSubmitted,
+    this.onChanged,
   });
 
   @override
@@ -79,6 +81,7 @@ class _ThTextboxState extends State<ThTextbox> {
       width: widget.width,
       height: 40,
       child: TextField(
+        onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         controller: widget.controller,
         onTapOutside: widget.onTapOutside,
