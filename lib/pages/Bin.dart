@@ -164,14 +164,7 @@ class _BinState extends State<Bin> {
             },):null,
             showicontext?Text('Bin', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
 
-            ThTextbox(
-              focusNode: focusNode1,
-              onTap: searchbar,
-              width: width,
-              height: 40,
-              text: '',
-              prefixicon: Icon(Icons.search,),
-            )//SearchBar
+
           ].whereType<Widget>().toList(),
           rightWidgets: [
             IconButton(

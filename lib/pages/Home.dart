@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
       setState(() {});
     });
     super.initState();
-
+    if(isSearching){showicontext=false;}else{showicontext=true;}
     run=true;
     sidebarUpperItems=[
       {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':true,'onPress':(){}},
@@ -109,7 +109,7 @@ class _HomeState extends State<Home> {
         width=40;
         iconsize=22;
         titlesize=20;
-        showicontext=true;
+        isSearching?showicontext=false:showicontext=true;
         isSearching=false;
         setState(() {});
       }else{
@@ -236,12 +236,23 @@ class _HomeState extends State<Home> {
             showicontext?Text('Keep', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
 
             ThTextbox(
+              controller: searchController,
               focusNode: searchfocusNode,
               onTap: searchbar,
-              width: width,
+              width: isSearching?160:width,
               height: 40,
               text: '',
               prefixicon: Icon(Icons.search,),
+              onChanged: (value) {
+                searchQuery = searchController.text;
+                NoteStore.filteredIndex.clear();
+                for (int i = 0; i < NoteStore.items.length; i++) {
+                  if (NoteStore.items[i].toLowerCase().contains(searchQuery.toLowerCase())) {
+                    NoteStore.filteredIndex.add(i);
+                  }
+                }
+                setState(() {});
+              },
             )//SearchBar
           ].whereType<Widget>().toList(),
           rightWidgets: [
@@ -353,6 +364,22 @@ class _HomeState extends State<Home> {
                                             ],
                                           ),
                                         ),
+                                      if(isSearching&&NoteStore.filteredIndex.isEmpty)
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.search_off,size: 100,color: Colors.black.withOpacity(0.1),),
+                                              Text('No matching results!',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.black.withOpacity(0.6)
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       if(addclick||NoteStore.items.isNotEmpty)
                                         isGridview?GridView.builder(
                                           shrinkWrap: true,
@@ -363,7 +390,7 @@ class _HomeState extends State<Home> {
                                             mainAxisSpacing: 10,
                                             childAspectRatio: 1,
                                           ),
-                                          itemCount: isSearching ?NoteStore.filteredItems.length:NoteStore.items.length,
+                                          itemCount: isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,
                                           itemBuilder: (context, index) {
 
                                             return Container(
@@ -380,7 +407,7 @@ class _HomeState extends State<Home> {
                                                   children: [
                                                     Expanded(
                                                       child: Text(
-                                                        isSearching ? NoteStore.items[NoteStore.filteredIndex[index]] : NoteStore.items[index],
+                                                        isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],
                                                         style: TextStyle(fontSize: 18),
                                                         softWrap: true,
                                                         overflow: TextOverflow.ellipsis,
@@ -392,12 +419,21 @@ class _HomeState extends State<Home> {
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       children: [
                                                         IconButton(
-                                                          onPressed: ()=>editnote(index),
+                                                          onPressed: ()=>editnote(NoteStore.filteredIndex.length>0?NoteStore.filteredIndex[index]:index),
                                                           icon: Icon(Icons.edit_outlined, size: 20),
                                                           tooltip: 'Edit',
                                                         ),//Edit button on note
                                                         IconButton(
-                                                          onPressed: isediting?(){}: () =>deletenote(index),
+                                                          onPressed:isediting?(){}: (){
+                                                            if (isSearching && index < NoteStore.filteredIndex.length) {
+                                                              // Get the ACTUAL original index from the filteredIndex
+                                                              int originalIndexToDelete = NoteStore.filteredIndex[index];
+                                                              deletenote(originalIndexToDelete);
+                                                            } else if (!isSearching && index < NoteStore.items.length) {
+                                                              // If not searching, the 'index' from GridView/ListView IS the original index
+                                                              deletenote(index);
+                                                            }
+                                                          },
                                                           icon: Icon(Icons.delete_outline, size: 20),
                                                           tooltip: 'Delete',
                                                         ),//Delete button of note
@@ -625,7 +661,22 @@ class _HomeState extends State<Home> {
                                             ],
                                           ),
                                         ),
-
+                                      if(isSearching&&NoteStore.filteredIndex.isEmpty)
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.search_off,size: 100,color: Colors.black.withOpacity(0.1),),
+                                              Text('No matching result found!',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize:screenwidth<=545?20: 24,
+                                                    color: Colors.black.withOpacity(0.6)
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       if(addclick||NoteStore.items.isNotEmpty)
                                         isGridview?GridView.builder(
                                           shrinkWrap: true,
