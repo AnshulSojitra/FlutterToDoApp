@@ -91,7 +91,7 @@ class _BinState extends State<Bin> {
       ...NoteStore.labels
     ];
     sidebarLowerItems=[
-      {'variant':'plain','text':'Archive','icon':Icons.archive_outlined,'onpage':false,'onPress':(){}},
+      {'variant':'plain','text':'Settings','icon':Icons.settings_outlined,'onpage':false,'onPress':(){}},
       {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':true,'onPress':(){}},
     ];
     focusNode1.addListener(() {
@@ -152,18 +152,7 @@ class _BinState extends State<Bin> {
 
     return
       Scaffold(
-        bottomNavigationBar: ThFooter(
-          rightWidgets: [
-            ThButton(
-              variant: 'primary',
-              text: 'Empty bin',
-              onPress: (){
-                setState(() {
-                  NoteStore.deletedItems.clear();
-                });
-              },
-            )
-        ],),
+
         backgroundColor: Colors.white,
         appBar: ThAppBar(
           leftWidgets: [
@@ -201,17 +190,8 @@ class _BinState extends State<Bin> {
               onPressed: toggleview,
               constraints: BoxConstraints(
                 minWidth: 20,
-
               ),
             ),//ListView
-            IconButton(
-              icon: Icon(Icons.settings_outlined,size:18,),
-              tooltip: 'Settings',
-              onPressed: () {},
-              constraints: BoxConstraints(
-                minWidth:20,
-              ),
-            ),//Settings
             IconButton(
               icon: Icon(Icons.apps,size:18,),
               tooltip: 'Apps',
@@ -339,7 +319,23 @@ class _BinState extends State<Bin> {
                     ),
                   ],
                 ),
-
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                    child:ThFooter(
+                      rightWidgets: [
+                        ThButton(
+                          variant: 'primary',
+                          text: 'Empty bin',
+                          onPress: (){
+                            setState(() {
+                              NoteStore.deletedItems.clear();
+                            });
+                          },
+                        )
+                      ],),
+                ),
                 if (opensidebar)
                   Positioned(
                     top: 0,
@@ -376,18 +372,6 @@ class _BinState extends State<Bin> {
           } else {
             return Scaffold(
             backgroundColor: Colors.white,
-              bottomNavigationBar: ThFooter(
-                rightWidgets: [
-                  ThButton(
-                    variant: 'primary',
-                    text: 'Empty bin',
-                    onPress: (){
-                      setState(() {
-                        NoteStore.deletedItems.clear();
-                      });
-                    },
-                  )
-                ],),
             appBar: ThAppBar(
               leftWidgets: [
                 IconButton(icon:Icon(Icons.featured_play_list,size:  screenwidth<=990?20:30,),onPressed: (){
@@ -431,14 +415,7 @@ class _BinState extends State<Bin> {
 
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.settings_outlined,size:20,),
-                  tooltip: 'Settings',
-                  onPressed: () {},
-                  constraints: BoxConstraints(
-                    minWidth: screenwidth<=990?screenwidth*0.02:20,
-                  ),
-                ),
+
                 IconButton(
                   icon: Icon(Icons.apps,size:20,),
                   tooltip: 'Apps',
@@ -452,6 +429,23 @@ class _BinState extends State<Bin> {
             ),
             body: Stack(
               children: [
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child:ThFooter(
+                    rightWidgets: [
+                      ThButton(
+                        variant: 'primary',
+                        text: 'Empty bin',
+                        onPress: (){
+                          setState(() {
+                            NoteStore.deletedItems.clear();
+                          });
+                        },
+                      )
+                    ],),
+                ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
