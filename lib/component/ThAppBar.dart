@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 
 
 
@@ -29,11 +30,11 @@ class ThAppBar extends StatelessWidget implements PreferredSizeWidget {
     final double screenwidth=MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.25*255).toInt()),
-            blurRadius: 8,
+            color: NoteStore.isDarkMode?Colors.white.withAlpha((0.25*255).toInt()):Colors.black.withAlpha((0.25*255).toInt()),
+            blurRadius: NoteStore.isDarkMode?0:8,
             offset: const Offset(0, 0.15),
           ),
         ],

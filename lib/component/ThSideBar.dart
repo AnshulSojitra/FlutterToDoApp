@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThButton.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 
 class ThSideBar extends StatelessWidget {
   final List<ThButton> upperbuttons;
   final List<ThButton> lowerbuttons;
-  final Color color;
+  final Color? color;
   final double width;
-  const ThSideBar({super.key, this.upperbuttons = const [],this.lowerbuttons=const[], this.color=Colors.white70,this.width=240});
+  const ThSideBar({super.key, this.upperbuttons = const [],this.lowerbuttons=const[], this.color,this.width=240});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? (NoteStore.isDarkMode ? Colors.black87 : Colors.white70),
         boxShadow: [
           BoxShadow(
             //color: Colors.white38,
-
-            offset: const Offset(0, 0),
+            color: NoteStore.isDarkMode?Colors.white:Colors.black,
+            offset: const Offset(0.15, 0),
           ),
         ],
       ),
@@ -32,7 +33,7 @@ class ThSideBar extends StatelessWidget {
                 children: upperbuttons,
               ),
             ),
-            
+
 
             Column(
               mainAxisAlignment: MainAxisAlignment.end,

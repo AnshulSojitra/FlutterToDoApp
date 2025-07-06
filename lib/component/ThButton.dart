@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 
 class ThButton extends StatefulWidget {
   final String text;
@@ -32,6 +33,7 @@ class _ThButtonState extends State<ThButton> {
     BorderSide border = const BorderSide(color: Colors.grey, width: 1);
     Color hoverBackground = Colors.transparent;
     Color hoverForeground = Colors.black;
+    Color darkhoverForeground= Colors.white;
     BorderSide hoverBorder = const BorderSide(color: Colors.transparent, width: 1);
 
     // Apply variant styles
@@ -62,8 +64,8 @@ class _ThButtonState extends State<ThButton> {
         break;
 
       case 'dark-outline':
-        border = const BorderSide(color: Colors.black);
-        hoverBorder = const BorderSide(color: Colors.black);
+        border = BorderSide(color: Colors.black);
+        hoverBorder = BorderSide(color: Colors.black);
         hoverBackground = Colors.black;
         hoverForeground = Colors.white;
         break;
@@ -91,16 +93,16 @@ class _ThButtonState extends State<ThButton> {
           ).copyWith(
             backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
               if (states.contains(MaterialState.hovered)) {
-                return Colors.black;
+                return NoteStore.isDarkMode?Colors.white:Colors.black;
               }
               return widget.onpage ? Colors.deepPurpleAccent : Colors.transparent;
             }),
             overlayColor: MaterialStateProperty.all(Colors.black12),
             foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
               if (states.contains(MaterialState.hovered)) {
-                return Colors.white;
+                return NoteStore.isDarkMode ? Colors.black : Colors.white;
               }
-              return Colors.black;
+              return NoteStore.isDarkMode ? Colors.white : Colors.black;
             }),
             animationDuration: Duration.zero,
           ),
@@ -109,16 +111,22 @@ class _ThButtonState extends State<ThButton> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                if (widget.icon != null) widget.icon!,
+                if (widget.icon != null)
+                  Icon(
+                    widget.icon!.icon,
+                    size: widget.icon!.size,
+                  ),
                 if (widget.icon != null) const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     widget.text,
-                    style: const TextStyle(fontSize: 18, fontFamily: 'RobotoFont'),
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'RobotoFont',
+                    ),
                   ),
-                ),
-              ],
+                )],
             ),
           ),
         ),
@@ -144,10 +152,30 @@ class _ThButtonState extends State<ThButton> {
         ),
         overlayColor: MaterialStateProperty.all(Colors.transparent),
         foregroundColor: MaterialStateProperty.resolveWith<Color>(
-              (states) => states.contains(MaterialState.hovered) ? hoverForeground : foregroundColor,
+          (states) => states.contains(MaterialState.hovered)
+              ? hoverForeground
+              : foregroundColor,
         ),
       ),
-      child: Text(widget.text),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.icon != null)
+            Icon(
+              widget.icon!.icon,
+              size: widget.icon!.size,
+            ),
+          if (widget.icon != null) const SizedBox(width: 8),
+          Text(
+            widget.text,
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: 'RobotoFont',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 
 class ThTextbox extends StatefulWidget {
   final String variant; // 'basic', 'password', 'number', 'multiline', 'select'
@@ -81,6 +82,7 @@ class _ThTextboxState extends State<ThTextbox> {
       width: widget.width,
       height: 40,
       child: TextField(
+        style: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         controller: widget.controller,
@@ -95,8 +97,13 @@ class _ThTextboxState extends State<ThTextbox> {
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),
           isDense: true,
           labelText: widget.text,
+          labelStyle: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.grey, width: 1),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
           ),

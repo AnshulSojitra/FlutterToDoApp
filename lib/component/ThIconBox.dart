@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 class ThIconBox extends StatefulWidget{
   final double width;
   final double height;
@@ -24,16 +25,26 @@ class _ThIconBoxState extends State<ThIconBox> {
       width: widget.width,
       height: widget.height,
       child: TextField(
-
+        style: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
         focusNode: widget.focusNode ,
         onTap: widget.onTap,
         onSubmitted: widget.onSubmitted,
         controller: widget.controller,
         decoration: InputDecoration(
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.grey, width: 2),
+          ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelText:widget.text,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+          labelText: widget.text,
+          labelStyle: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
           suffixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: widget.sufixicons),
           prefixIcon: Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: widget.prefixicons),
 

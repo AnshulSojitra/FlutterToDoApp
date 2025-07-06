@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
 import 'package:untitled1/component/ThFooter.dart';
-import 'package:untitled1/component/ThIconBox.dart';
 import 'package:untitled1/component/ThSideBar.dart';
 import 'package:untitled1/component/ThTextbox.dart';
 import 'package:untitled1/pages/NoteStore.dart';
@@ -61,7 +60,10 @@ class _BinState extends State<Bin> {
         'onPress':(){
           showDialog(context: context, builder: (context){
             return AlertDialog(
-              title: Text('Add Label'),
+              backgroundColor: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white,
+              title: Text('Add Label',
+                style: TextStyle(color: NoteStore.isDarkMode?Colors.white:Colors.black,),
+              ),
               content: SizedBox(
                 height: 100,
                 child: Column(
@@ -77,7 +79,7 @@ class _BinState extends State<Bin> {
                         spacing: 8,
                         children: [
                           ThButton(text: 'Add',variant: 'primary',onPress: addlabel,),
-                          ThButton(variant: 'dark-outline',text: 'Cancel',onPress: (){
+                          ThButton(variant: NoteStore.isDarkMode?'primary':'dark-outline',text: 'Cancel',onPress: (){
                             Navigator.of(context).pop();
                           },)
                         ],
@@ -371,25 +373,27 @@ class _BinState extends State<Bin> {
             return android(screenwidth);
           } else {
             return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: NoteStore.isDarkMode?Colors.black.withOpacity(0.9):Colors.white,
             appBar: ThAppBar(
               leftWidgets: [
-                IconButton(icon:Icon(Icons.featured_play_list,size:  screenwidth<=990?20:30,),onPressed: (){
-                  if(opensidebar==true){
-                    opensidebar=false;
-                  }else{
-                    opensidebar=true;
-                  }
-                  setState(() {});
-                },),
-                Text('Bin', style: TextStyle(fontSize:  screenwidth<=990?22:25, fontFamily: 'GilroyFont')),
+                IconButton(
+                  icon:Icon(Icons.featured_play_list, size:  screenwidth<=990?20:30,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
+                  onPressed: (){
+                    if(opensidebar==true){
+                      opensidebar=false;
+                    }else{
+                      opensidebar=true;
+                    }
+                    setState(() {});
+                  },),
+                Text('Keep',
+                    style: TextStyle(
+                        color:NoteStore.isDarkMode?Colors.white:Colors.black ,
+                        fontSize:  screenwidth<=990?22:25,
+                        fontFamily: 'GilroyFont')
+                ),
                 // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
-                ThTextbox(
-                  width: screenwidth<=990?screenwidth*0.3:400,
-                  height: 40,
-                  text: 'Search',
-                  prefixicon: Icon(Icons.search),
-                )
+
               ],
               rightWidgets: [
                 IconButton(
@@ -397,17 +401,43 @@ class _BinState extends State<Bin> {
                     minWidth: screenwidth<=990?screenwidth*0.04:20,
                     minHeight: screenwidth<=990?screenwidth*0.02:20,
                   ),
-                  tooltip: 'Refresh',
-                  icon: Icon(Icons.refresh,size:20,),
+                  tooltip: NoteStore.isDarkMode?'Light Mode':'Dark Mode',
+                  icon: Icon(
+                    NoteStore.isDarkMode?Icons.light_mode_outlined:Icons.dark_mode_outlined,size:18,
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                  ),
                   onPressed: () {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => const Bin(deleteditemslist: [],)),
-                    // );
+                    if(NoteStore.isDarkMode)
+                      NoteStore.isDarkMode=false;
+                    else
+                      NoteStore.isDarkMode=true;
+                    setState(() {});
                   },
                 ),
                 IconButton(
-                  icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size: 20,):Icon(Icons.grid_view_outlined,size: 20,),
+                  constraints: BoxConstraints(
+                    minWidth: screenwidth<=990?screenwidth*0.04:20,
+                    minHeight: screenwidth<=990?screenwidth*0.02:20,
+                  ),
+                  tooltip: 'Refresh',
+                  icon: Icon(
+                    Icons.refresh,
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                    size:20,
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Home()),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    isGridview?Icons.format_list_bulleted_outlined:Icons.grid_view_outlined,
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                    size: 20,
+                  ),
                   tooltip: isGridview?'Listview':'Gridview',
                   onPressed: toggleview,
                   constraints: BoxConstraints(
@@ -415,9 +445,12 @@ class _BinState extends State<Bin> {
 
                   ),
                 ),
-
                 IconButton(
-                  icon: Icon(Icons.apps,size:20,),
+                  icon: Icon(
+                    Icons.apps,
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                    size:20,
+                  ),
                   tooltip: 'Apps',
                   onPressed: () {},
                   constraints: BoxConstraints(
@@ -452,7 +485,7 @@ class _BinState extends State<Bin> {
                   children: [
                     ThSideBar(
                       width: opensidebar? screenwidth<=990?172:240:74,
-                      color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+                      color: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white70.withAlpha((0.9 * 255).toInt()),
                       upperbuttons: sidebarUpperItems.map((item){
                         return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
                       }).toList(),
@@ -464,7 +497,8 @@ class _BinState extends State<Bin> {
                     NoteStore.deletedItems.isEmpty?
                         Expanded(
                           child: Center(
-                            child: Text('The bin is empty'),
+                            child: Text('The bin is empty',
+                            style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
                           ),
                         )
                         :Expanded(
@@ -499,7 +533,7 @@ class _BinState extends State<Bin> {
                                         Expanded(
                                           child: Text(
                                             deleteditems[index],
-                                            style: TextStyle(fontSize: 18),
+                                            style: TextStyle(fontSize: 18,color: NoteStore.isDarkMode?Colors.white:Colors.black),
                                             softWrap: true,
                                             overflow: TextOverflow.ellipsis,
                                             maxLines: 5,
@@ -511,11 +545,11 @@ class _BinState extends State<Bin> {
                                                 .center,
                                             children: [
                                               IconButton(icon: Icon(
-                                                Icons.restore, size: 20,),
+                                                Icons.restore, size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                                 tooltip: 'Restore',
                                                 onPressed: () =>restorenote(index),),
                                               IconButton(icon: Icon(
-                                                Icons.delete_outline, size: 20,),
+                                                Icons.delete_outline, size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                                 tooltip: 'Delete',
                                                 onPressed: () => permanentdeletenote(index),)
                                             ])

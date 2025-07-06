@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/pages/NoteStore.dart';
 class ThFooter extends StatelessWidget implements PreferredSizeWidget {
 
   final List<Widget> rightWidgets;
@@ -16,12 +17,12 @@ class ThFooter extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black,
+            color: NoteStore.isDarkMode?Colors.white:Colors.black,
             blurRadius: 0,
-            offset: const Offset(0, 0),
+            offset: const Offset(0, -0.15),
           ),
         ],
       ),
