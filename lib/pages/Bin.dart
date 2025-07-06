@@ -151,14 +151,12 @@ class _BinState extends State<Bin> {
     setState(() {});
   }
   Widget android(double screenwidth){
-
     return
       Scaffold(
-
-        backgroundColor: Colors.white,
+        backgroundColor:NoteStore.isDarkMode?Colors.black.withOpacity(0.9): Colors.white,
         appBar: ThAppBar(
           leftWidgets: [
-            showicontext?IconButton(icon:Icon(Icons.featured_play_list,size: iconsize,),onPressed: (){
+            showicontext?IconButton(icon:Icon(Icons.featured_play_list,size: iconsize,color: NoteStore.isDarkMode?Colors.white:Colors.black,),onPressed: (){
               if(opensidebar==true){
                 opensidebar=false;
               }else if(opensidebar==false){
@@ -166,18 +164,40 @@ class _BinState extends State<Bin> {
               }
               setState(() {});
             },):null,
-            showicontext?Text('Bin', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
+            showicontext?Text('Bin', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont',color: NoteStore.isDarkMode?Colors.white:Colors.black,)):null,
 
 
           ].whereType<Widget>().toList(),
           rightWidgets: [
             IconButton(
               constraints: BoxConstraints(
+                minWidth: screenwidth<=990?screenwidth*0.04:20,
+                minHeight: screenwidth<=990?screenwidth*0.02:20,
+              ),
+              tooltip: NoteStore.isDarkMode?'Light Mode':'Dark Mode',
+              icon: Icon(
+                NoteStore.isDarkMode?Icons.light_mode_outlined:Icons.dark_mode_outlined,size:18,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
+              onPressed: () {
+                if(NoteStore.isDarkMode)
+                  NoteStore.isDarkMode=false;
+                else
+                  NoteStore.isDarkMode=true;
+                setState(() {});
+              },
+            ),
+            IconButton(
+              constraints: BoxConstraints(
                 minWidth: 20,
                 minHeight:20,
               ),
               tooltip: 'Refresh',
-              icon: Icon(Icons.refresh,size:18,),
+              icon: Icon(
+                Icons.refresh,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                size:18,
+              ),
               onPressed: () {
                 // Navigator.pushReplacement(
                 //   context,
@@ -186,8 +206,11 @@ class _BinState extends State<Bin> {
               },
             ), //Refresh
             IconButton(
-
-              icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size:18,):Icon(Icons.grid_view_outlined,size: 18,),
+              icon: Icon(
+                isGridview?Icons.format_list_bulleted_outlined:Icons.grid_view_outlined,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                size:18,
+              ),
               tooltip: 'Listview',
               onPressed: toggleview,
               constraints: BoxConstraints(
@@ -195,7 +218,7 @@ class _BinState extends State<Bin> {
               ),
             ),//ListView
             IconButton(
-              icon: Icon(Icons.apps,size:18,),
+              icon: Icon(Icons.apps,size:18,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
               tooltip: 'Apps',
               onPressed: () {},
               constraints: BoxConstraints(
@@ -222,7 +245,9 @@ class _BinState extends State<Bin> {
                 NoteStore.deletedItems.isEmpty?
                     Expanded(
                         child: Center(
-                          child: Text('The bin is empty')
+                          child: Text('The bin is empty',
+                            style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                          )
                         )
                     )
                     :Row(
@@ -242,7 +267,6 @@ class _BinState extends State<Bin> {
                           itemCount: deleteditems.length,
                           itemBuilder: (context, index) {
                             return Container(
-
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
                                 borderRadius: BorderRadius.circular(16),
@@ -256,7 +280,7 @@ class _BinState extends State<Bin> {
                                     Expanded(
                                       child: Text(
                                         deleteditems[index],
-                                        style: TextStyle(fontSize: 18),
+                                        style: TextStyle(fontSize: 18,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                         softWrap: true,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 5,
@@ -268,12 +292,12 @@ class _BinState extends State<Bin> {
                                       children: [
                                         IconButton(
                                           onPressed: ()=>restorenote(index),
-                                          icon: Icon(Icons.restore, size: 20),
+                                          icon: Icon(Icons.restore, size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                           tooltip: 'Edit',
                                         ),//Edit button on note
                                         IconButton(
                                           onPressed: () =>permanentdeletenote(index),
-                                          icon: Icon(Icons.delete_outline, size: 20),
+                                          icon: Icon(Icons.delete_outline, size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                           tooltip: 'Delete',
                                         ),//Delete button of note
                                       ],
@@ -295,22 +319,22 @@ class _BinState extends State<Bin> {
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(width: 2,color: Colors.deepPurpleAccent),
                               ),
-
                               child: Padding(
                                 padding: EdgeInsets.all(screenwidth<=847?7.60:10),
                                 child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                        child: Text(NoteStore.deletedItems[index], style: TextStyle(fontSize: 18),
+                                        child: Text(NoteStore.deletedItems[index],
+                                          style: TextStyle(fontSize: 18,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                                           softWrap: true,
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                         ),
                                       ),
                                       Spacer(),
-                                      IconButton(onPressed: ()=>restorenote(index), icon: Icon(Icons.restore,size: 20,),tooltip: 'Restore',),
-                                      IconButton(onPressed: ()=>permanentdeletenote(index), icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Permanent Delete',)
+                                      IconButton(onPressed: ()=>restorenote(index), icon: Icon(Icons.restore,size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),tooltip: 'Restore',),
+                                      IconButton(onPressed: ()=>permanentdeletenote(index), icon: Icon(Icons.delete_outline,size: 20,color: NoteStore.isDarkMode?Colors.white:Colors.black,),tooltip: 'Permanent Delete',)
                                     ]),
                               ),
                             );
@@ -348,7 +372,7 @@ class _BinState extends State<Bin> {
                       color: Colors.white.withOpacity(0.95),
                       child: ThSideBar(
                         width: opensidebar? screenwidth<=990?172:240:74,
-                        color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+                        color: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white70.withAlpha((0.9 * 255).toInt()),
                         upperbuttons: sidebarUpperItems.map((item){
                           return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
                         }).toList(),

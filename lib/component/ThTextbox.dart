@@ -102,7 +102,7 @@ class _ThTextboxState extends State<ThTextbox> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.grey, width: 1),
+            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.black, width: 1),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),

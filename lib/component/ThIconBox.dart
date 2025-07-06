@@ -37,7 +37,7 @@ class _ThIconBoxState extends State<ThIconBox> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.grey, width: 2),
+            borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.black, width: 2),
           ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           labelText: widget.text,

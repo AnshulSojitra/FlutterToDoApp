@@ -232,10 +232,16 @@ class _HomeState extends State<Home> {
     final double screenheight=MediaQuery.of(context).size.height;
     return
       Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: NoteStore.isDarkMode?Colors.black.withOpacity(0.9):Colors.white,
         appBar: ThAppBar(
           leftWidgets: [
-            showicontext?IconButton(icon:Icon(Icons.featured_play_list,size: iconsize,),onPressed: (){
+            showicontext?IconButton(
+              icon:Icon(
+                Icons.featured_play_list,
+                size: iconsize,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
+              onPressed: (){
               if(opensidebar==true){
                 opensidebar=false;
               }else if(opensidebar==false){
@@ -243,7 +249,13 @@ class _HomeState extends State<Home> {
               }
               setState(() {});
             },):null,
-            showicontext?Text('Keep', style: TextStyle(fontSize: titlesize, fontFamily: 'GilroyFont')):null,
+            showicontext?Text('Keep',
+                style: TextStyle(
+                    fontSize: titlesize,
+                    fontFamily: 'GilroyFont',
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black
+                )
+            ):null,
 
             ThTextbox(
               controller: searchController,
@@ -252,7 +264,7 @@ class _HomeState extends State<Home> {
               width: isSearching?160:width,
               height: 40,
               text: '',
-              prefixicon: Icon(Icons.search,),
+              prefixicon: Icon(Icons.search,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
               onChanged: (value) {
                 getSearchedItems();
               },
@@ -265,7 +277,11 @@ class _HomeState extends State<Home> {
                 minHeight: screenwidth<=990?screenwidth*0.02:20,
               ),
               tooltip: NoteStore.isDarkMode?'Light Mode':'Dark Mode',
-              icon: Icon(NoteStore.isDarkMode?Icons.light_mode_outlined:Icons.dark_mode_outlined,size:18,),
+              icon: Icon(
+                NoteStore.isDarkMode?Icons.light_mode_outlined:Icons.dark_mode_outlined,
+                size:18,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
               onPressed: () {
                 if(NoteStore.isDarkMode)
                   NoteStore.isDarkMode=false;
@@ -280,7 +296,11 @@ class _HomeState extends State<Home> {
                 minHeight:20,
               ),
               tooltip: 'Refresh',
-              icon: Icon(Icons.refresh,size:18,),
+              icon: Icon(
+                Icons.refresh,
+                size:18,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -290,7 +310,11 @@ class _HomeState extends State<Home> {
             ), //Refresh
             IconButton(
 
-              icon: isGridview?Icon(Icons.format_list_bulleted_outlined,size:18,):Icon(Icons.grid_view_outlined,size: 18,),
+              icon: Icon(
+                isGridview?Icons.format_list_bulleted_outlined:Icons.grid_view_outlined,
+                size:18,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
               tooltip: 'Listview',
               onPressed: toggleview,
               constraints: BoxConstraints(
@@ -300,7 +324,11 @@ class _HomeState extends State<Home> {
             ),//ListView
             //Settings
             IconButton(
-              icon: Icon(Icons.apps,size:18,),
+              icon: Icon(
+                Icons.apps,
+                size:18,
+                color: NoteStore.isDarkMode?Colors.white:Colors.black,
+              ),
               tooltip: 'Apps',
               onPressed: () {},
               constraints: BoxConstraints(
@@ -348,12 +376,18 @@ class _HomeState extends State<Home> {
                                             mainAxisAlignment: MainAxisAlignment.end,
                                             children: [
                                               IconButton(
-                                                icon: Icon(Icons.add),
+                                                icon: Icon(
+                                                  Icons.add,
+                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                ),
                                                 onPressed: addnote,
                                                 tooltip: 'Add note',
                                               ),
                                               IconButton(
-                                                icon: Icon(Icons.image_outlined,),
+                                                icon: Icon(
+                                                  Icons.image_outlined,
+                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                ),
                                                 tooltip: 'Add image',
                                                 onPressed: () {
                                                   if(MediaQuery.of(context).size.width<=426){
@@ -371,12 +405,16 @@ class _HomeState extends State<Home> {
                                           padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
                                           child: Column(
                                             children: [
-                                              Icon(Icons.lightbulb_outline,size: 100,color: Colors.black.withOpacity(0.1),),
+                                              Icon(
+                                                Icons.lightbulb_outline,
+                                                size: 100,
+                                                color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),
+                                              ),
                                               Text('Notes that you add appear here',
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     fontSize: 16,
-                                                    color: Colors.black.withOpacity(0.6)
+                                                    color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
                                                 ),
                                               ),
                                             ],
@@ -387,12 +425,15 @@ class _HomeState extends State<Home> {
                                           padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
                                           child: Column(
                                             children: [
-                                              Icon(Icons.search_off,size: 100,color: Colors.black.withOpacity(0.1),),
+                                              Icon(
+                                                Icons.search_off,
+                                                size: 100,
+                                                color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),),
                                               Text('No matching results!',
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     fontSize: 16,
-                                                    color: Colors.black.withOpacity(0.6)
+                                                    color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
                                                 ),
                                               ),
                                             ],
@@ -424,7 +465,10 @@ class _HomeState extends State<Home> {
                                                     Expanded(
                                                       child: Text(
                                                         isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],
-                                                        style: TextStyle(fontSize: 18),
+                                                        style: TextStyle(
+                                                            color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                            fontSize: 18
+                                                        ),
                                                         softWrap: true,
                                                         overflow: TextOverflow.ellipsis,
                                                         maxLines: 5,
@@ -436,7 +480,11 @@ class _HomeState extends State<Home> {
                                                       children: [
                                                         IconButton(
                                                           onPressed: ()=>editnote(NoteStore.filteredIndex.length>0?NoteStore.filteredIndex[index]:index),
-                                                          icon: Icon(Icons.edit_outlined, size: 20),
+                                                          icon: Icon(
+                                                              Icons.edit_outlined,
+                                                              color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                              size: 20
+                                                          ),
                                                           tooltip: 'Edit',
                                                         ),//Edit button on note
                                                         IconButton(
@@ -450,7 +498,11 @@ class _HomeState extends State<Home> {
                                                               deletenote(index);
                                                             }
                                                           },
-                                                          icon: Icon(Icons.delete_outline, size: 20),
+                                                          icon: Icon(
+                                                              Icons.delete_outline,
+                                                              color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                              size: 20
+                                                          ),
                                                           tooltip: 'Delete',
                                                         ),//Delete button of note
                                                       ],
@@ -479,7 +531,12 @@ class _HomeState extends State<Home> {
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Expanded(
-                                                        child: Text(isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],style: TextStyle(fontSize: 18),
+                                                        child: Text(
+                                                          isSearching?NoteStore.items[NoteStore.filteredIndex[index]]:NoteStore.items[index],
+                                                          style: TextStyle(
+                                                              color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                              fontSize: 18
+                                                          ),
                                                           softWrap: true,
                                                           overflow: TextOverflow.ellipsis,
                                                           maxLines: 1,
@@ -488,10 +545,20 @@ class _HomeState extends State<Home> {
                                                       Spacer(),
                                                       IconButton(
                                                         onPressed: ()=>editnote(NoteStore.filteredIndex.length>0?NoteStore.filteredIndex[index]:index),
-                                                        icon: Icon(Icons.edit_outlined,size: 20,),tooltip: 'Edit',
+                                                        icon: Icon(
+                                                          Icons.edit_outlined,
+                                                          color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                          size: 20,
+                                                        ),
+                                                        tooltip: 'Edit',
                                                       ),
                                                       IconButton(
-                                                        icon: Icon(Icons.delete_outline,size: 20,),tooltip: 'Delete',
+                                                        icon: Icon(
+                                                          Icons.delete_outline,
+                                                          color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                          size: 20,
+                                                        ),
+                                                        tooltip: 'Delete',
                                                         onPressed:isediting?(){}: (){
                                                           if (isSearching && index < NoteStore.filteredIndex.length) {
                                                             // Get the ACTUAL original index from the filteredIndex
@@ -533,7 +600,7 @@ class _HomeState extends State<Home> {
                   color: Colors.white.withOpacity(0.95),
                   child: ThSideBar(
                     width: opensidebar? screenwidth<=990?172:240:74,
-                    color: Colors.white70.withAlpha((0.9 * 255).toInt()),
+                    color: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white70.withAlpha((0.9 * 255).toInt()),
                     upperbuttons: sidebarUpperItems.map((item){
                       return ThButton(variant:item['variant'],text: opensidebar?item['text']:'',onPress: item['onPress'],icon: Icon(item['icon'],size: 22,),onpage: item['onpage'],);
                     }).toList(),
@@ -575,11 +642,19 @@ class _HomeState extends State<Home> {
                 }
                 setState(() {});
               },),
-              Text('Keep',
-                  style: TextStyle(
-                    color:NoteStore.isDarkMode?Colors.white:Colors.black ,
-                      fontSize:  screenwidth<=990?22:25,
-                      fontFamily: 'GilroyFont')
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Home()),
+                  );
+                },
+                child: Text('Keep',
+                    style: TextStyle(
+                      color:NoteStore.isDarkMode?Colors.white:Colors.black ,
+                        fontSize:  screenwidth<=990?22:25,
+                        fontFamily: 'GilroyFont')
+                ),
               ),
               // SizedBox(width:  MediaQuery.of(context).size.width<=990?screenwidth*0.2:100),
               ThTextbox(
