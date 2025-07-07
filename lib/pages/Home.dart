@@ -343,7 +343,6 @@ class _HomeState extends State<Home> {
             // Main Content (Row without sidebar)
             GestureDetector(
               onTap:(){
-
                 opensidebar=false;
                 setState(() {});
               },
@@ -362,6 +361,8 @@ class _HomeState extends State<Home> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
+
+                                      SizedBox(height: 10),
                                       ThIconBox(
                                         focusNode: notefocusNode,
                                         onTap:(){opensidebar=false;setState(() {});},
@@ -375,6 +376,7 @@ class _HomeState extends State<Home> {
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.end,
                                             children: [
+
                                               IconButton(
                                                 icon: Icon(
                                                   Icons.add,
@@ -769,6 +771,7 @@ class _HomeState extends State<Home> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
+                                      SizedBox(height: 10,),
                                       ThIconBox(
                                         focusNode: notefocusNode,
                                         onSubmitted: (value){addnote();},

@@ -8,6 +8,7 @@ class ThButton extends StatefulWidget {
   final bool onpage;
   final VoidCallback? onPress;
   final double? width;
+  final double? height;
   const ThButton({
     super.key,
     this.text = 'ok',
@@ -16,6 +17,7 @@ class ThButton extends StatefulWidget {
     this.onpage = false,
     this.onPress,
     this.width,
+    this.height,
   });
 
   @override
@@ -134,47 +136,51 @@ class _ThButtonState extends State<ThButton> {
     }
 
     // Default button variant
-    return ElevatedButton(
-      onPressed: widget.onPress,
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        side: border,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ).copyWith(
-        animationDuration: Duration.zero,
-        side: MaterialStateProperty.resolveWith<BorderSide>(
-              (states) => states.contains(MaterialState.hovered) ? hoverBorder : border,
-        ),
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-              (states) => states.contains(MaterialState.hovered) ? hoverBackground : backgroundColor,
-        ),
-        overlayColor: MaterialStateProperty.all(Colors.transparent),
-        foregroundColor: MaterialStateProperty.resolveWith<Color>(
-          (states) => states.contains(MaterialState.hovered)
-              ? hoverForeground
-              : foregroundColor,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.icon != null)
-            Icon(
-              widget.icon!.icon,
-              size: widget.icon!.size,
-            ),
-          if (widget.icon != null) const SizedBox(width: 8),
-          Text(
-            widget.text,
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'RobotoFont',
-            ),
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: ElevatedButton(
+        onPressed: widget.onPress,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: backgroundColor,
+          foregroundColor: foregroundColor,
+          side: border,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ).copyWith(
+          animationDuration: Duration.zero,
+          side: MaterialStateProperty.resolveWith<BorderSide>(
+                (states) => states.contains(MaterialState.hovered) ? hoverBorder : border,
           ),
-        ],
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (states) => states.contains(MaterialState.hovered) ? hoverBackground : backgroundColor,
+          ),
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+          foregroundColor: MaterialStateProperty.resolveWith<Color>(
+            (states) => states.contains(MaterialState.hovered)
+                ? hoverForeground
+                : foregroundColor,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.icon != null)
+              Icon(
+                widget.icon!.icon,
+                size: widget.icon!.size,
+              ),
+            if (widget.icon != null) const SizedBox(width: 8),
+            Text(
+              widget.text,
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'RobotoFont',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
