@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
@@ -133,7 +134,8 @@ class _HomeState extends State<Home> {
     showicontext=false;
     setState(() {});
   }
-  void addnote(){
+  void addnote()async{
+    await uploadNotesToDatabse();
 
     if(MediaQuery.of(context).size.width<=426){
       opensidebar=false;
@@ -227,7 +229,15 @@ class _HomeState extends State<Home> {
     }
     setState(() {});
   }
-
+  Future<void> uploadNotesToDatabse ()async{
+    try{
+      FirebaseFirestore.instance.collection("Notes").add({
+        "note": notecontroller.text.trim(),
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
   Widget android(double screenwidth){
     final double screenheight=MediaQuery.of(context).size.height;
     return
