@@ -98,10 +98,6 @@ class _LoginState extends State<Login> {
                   height: 40,
                   onPress: ()async{
                     await loginUser();
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Home()),
-                    );
                   },
                 ),
                 SizedBox(height: 10),
@@ -170,10 +166,6 @@ class _LoginState extends State<Login> {
                   height: 40,
                   onPress: ()async {
                     await createUser();
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Home()),
-                    );
                   },
                 ),
                 SizedBox(height: 10),

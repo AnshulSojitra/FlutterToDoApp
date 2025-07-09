@@ -25,7 +25,11 @@ class MyApp extends StatelessWidget {
             stream: FirebaseAuth.instance.authStateChanges(),
             builder:(context,snapshot) {
               if(snapshot.connectionState==ConnectionState.waiting){
-                return Text('Loading...');
+                return Scaffold( // Or Material if you don't need AppBar etc.
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               }
               if(snapshot.data!=null){
                 return Home();
