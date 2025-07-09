@@ -6,6 +6,6 @@ class NoteStore {
   static List<String> deletedItems = [];
   static List<int> filteredIndex = [];
   static List<Map<String, dynamic>> labels=[];
-  static bool isDarkMode = false;
+  static bool isDarkMode = true;
   static String username = '';
 }

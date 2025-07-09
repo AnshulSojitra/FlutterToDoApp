@@ -43,12 +43,13 @@ class _LoginState extends State<Login> {
   }
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: NoteStore.isDarkMode?Colors.grey.shade900:Colors.grey,
       body: Center(
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: NoteStore.isDarkMode?Colors.black26:Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.black38,
@@ -59,8 +60,8 @@ class _LoginState extends State<Login> {
             borderRadius: BorderRadius.circular(10),
           ),
           constraints: BoxConstraints(
-            minWidth: 250,
-            minHeight: 352
+            minWidth: screenWidth<426?250:400,
+            minHeight: screenWidth<426?352:500
           ),
           width: 0,
           height: 0,
@@ -74,7 +75,7 @@ class _LoginState extends State<Login> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: NoteStore.isDarkMode?Colors.white:Colors.black87,
                   ),
                 ),
                 SizedBox(height: 20),
@@ -106,7 +107,11 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Text("Don't have an account?"),
+                    Text("Don't have an account?",
+                        style: TextStyle(
+                          color: NoteStore.isDarkMode?Colors.white70:Colors.black87,
+                        )
+                    ),
                     GestureDetector(
                       onTap: (){
                         isLogin=false;
@@ -137,7 +142,7 @@ class _LoginState extends State<Login> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color:NoteStore.isDarkMode?Colors.white: Colors.black87,
                   ),
                 ),
                 SizedBox(height: 20),
@@ -174,7 +179,11 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Text("Already have an account?"),
+                    Text("Already have an account?",
+                        style: TextStyle(
+                          color: NoteStore.isDarkMode?Colors.white70:Colors.black87,
+                        )
+                    ),
                     GestureDetector(
                       onTap: (){
                         isLogin=true;
