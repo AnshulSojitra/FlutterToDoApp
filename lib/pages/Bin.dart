@@ -45,11 +45,6 @@ class _BinState extends State<Bin> {
 
   Future<void> logout()async {
     await FirebaseAuth.instance.signOut();
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => Login()),
-      // Assuming Login() is your login widget
-          (Route<dynamic> route) => false, // Clear navigation stack
-    );
   }
   @override
   void initState() {
@@ -101,7 +96,7 @@ class _BinState extends State<Bin> {
     sidebarLowerItems=[
       {'variant':'plain','text':'Log out','icon':Icons.logout,'onpage':false,
         'onPress':()async{
-        logout();
+        await logout();
       }},
       {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':true,'onPress':(){}},
     ];

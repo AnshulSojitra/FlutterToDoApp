@@ -55,10 +55,6 @@ class _HomeState extends State<Home> {
 
   Future<void> logout()async{
     await FirebaseAuth.instance.signOut();
-    // Navigator.of(context).pushAndRemoveUntil(
-    //   MaterialPageRoute(builder: (context) => Login()), // Assuming Login() is your login widget
-    //       (Route<dynamic> route) => false, // Clear navigation stack
-    // );
   }
   @override
   void initState() {
@@ -106,7 +102,7 @@ class _HomeState extends State<Home> {
     sidebarLowerItems=[
       {'variant':'plain','text':'Log out','icon':Icons.logout,'onpage':false,
         'onPress':()async{
-        logout();
+        await logout();
       }},
       {'variant':'plain','text':'Bin','icon':Icons.delete_outline,'onpage':false,'onPress':(){
         setState(() {
@@ -673,6 +669,7 @@ class _HomeState extends State<Home> {
                 prefixicon: Icon(Icons.search,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                 onChanged: (value) {
                   searchQuery = searchController.text;
+                  print(searchQuery);
                   setState(() {});
                 },
               )
@@ -800,7 +797,9 @@ class _HomeState extends State<Home> {
                                         ),
                                       ),
                                         isGridview?FutureBuilder(
-                                          future: FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
+                                          future: isSearching?
+                                          FirebaseFirestore.instance.collection("Notes").orderBy("note").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).startAt([searchQuery]).endAt([searchQuery + '\uf8ff']).get()
+                                          :FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
                                           builder: (context,snapshot) {
                                             if(snapshot.connectionState==ConnectionState.waiting){
                                               return Center(
@@ -903,7 +902,9 @@ class _HomeState extends State<Home> {
                                           },
                                         ):
                                       FutureBuilder(
-                                        future: FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
+                                        future:  isSearching?
+                                        FirebaseFirestore.instance.collection("Notes").orderBy("note").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).startAt([searchQuery]).endAt([searchQuery + '\uf8ff']).get()
+                                            :FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
                                         builder: (context,snapshot) {
                                           if(snapshot.connectionState==ConnectionState.waiting){
                                             return Center(

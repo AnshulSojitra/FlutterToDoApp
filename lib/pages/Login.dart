@@ -99,8 +99,8 @@ class _LoginState extends State<Login> {
                   text: 'Enter Password',
                   controller: loginpasswordcontroller,
                   focusNode: passwordfocusNode,
-                  onSubmitted: (value){
-                    loginUser();
+                  onSubmitted: (value)async{
+                    await loginUser();
                   },
                 ),
                 SizedBox(height: 20),
