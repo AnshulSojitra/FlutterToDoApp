@@ -18,6 +18,7 @@ class _LoginState extends State<Login> {
   final TextEditingController passwordcontroller=TextEditingController();
   final TextEditingController loginusernamecontroller=TextEditingController();
   final TextEditingController loginpasswordcontroller=TextEditingController();
+  final FocusNode passwordfocusNode = FocusNode();
   bool isLogin = true;
 
   @override
@@ -35,12 +36,16 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> loginUser() async {
-    final userCredential = FirebaseAuth.instance.signInWithEmailAndPassword(
+    FirebaseAuth.instance.signInWithEmailAndPassword(
         email: loginusernamecontroller.text.trim(),
         password: loginpasswordcontroller.text.trim()
     );
-    print(userCredential);
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => Home()),
+    // );
   }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -83,12 +88,20 @@ class _LoginState extends State<Login> {
                   variant: 'text',
                   text: 'Enter Username',
                   controller: loginusernamecontroller,
+                  onSubmitted: (value){
+                    FocusScope.of(context).requestFocus(passwordfocusNode);
+                    setState(() {});
+                  },
                 ),
                 SizedBox(height: 20),
                 ThTextbox(
                   variant: 'password',
                   text: 'Enter Password',
                   controller: loginpasswordcontroller,
+                  focusNode: passwordfocusNode,
+                  onSubmitted: (value){
+                    loginUser();
+                  },
                 ),
                 SizedBox(height: 20),
                 ThButton(

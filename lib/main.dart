@@ -11,25 +11,27 @@ void main() async{
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
 
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-
         home: StreamBuilder(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder:(context,snapshot) {
               if(snapshot.connectionState==ConnectionState.waiting){
-                return Scaffold( // Or Material if you don't need AppBar etc.
-                  body: Center(
+                return  Center(
                     child: CircularProgressIndicator(),
-                  ),
-                );
+                  );
               }
               if(snapshot.data!=null){
                 return Home();
