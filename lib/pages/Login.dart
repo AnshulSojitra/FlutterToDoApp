@@ -36,7 +36,12 @@ class _LoginState extends State<Login> {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: usernamecontroller.text.trim(),
             password: passwordcontroller.text.trim()
-        );
+        ).then((res) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Home()),
+          );
+        });;
       } on FirebaseAuthException catch (e) {
         print(e.message);
         setState(() {
@@ -67,7 +72,12 @@ class _LoginState extends State<Login> {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: loginusernamecontroller.text.trim(),
           password: loginpasswordcontroller.text.trim()
-      );
+      ).then((res) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      });;
 
       setState(() {});
     } on FirebaseAuthException catch (e) {
@@ -119,7 +129,7 @@ class _LoginState extends State<Login> {
           ),
           constraints: BoxConstraints(
             minWidth: screenWidth<426?250:400,
-            minHeight: screenWidth<426?352:500
+            minHeight: screenWidth<426?450:500
           ),
           width: 0,
           height: 0,
@@ -141,7 +151,8 @@ class _LoginState extends State<Login> {
                   SizedBox(height: 20),
                   ThTextbox(
                     variant: 'text',
-                    text: 'Enter Username',
+                    text: 'Enter Email',
+                    height: 60,
                     controller: loginusernamecontroller,
                     onSubmitted: (value){
                       FocusScope.of(context).requestFocus(passwordfocusNode);

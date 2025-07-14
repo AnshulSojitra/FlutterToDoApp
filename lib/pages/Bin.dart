@@ -44,7 +44,13 @@ class _BinState extends State<Bin> {
   late List<Map<String, dynamic>> sidebarLowerItems=[];
 
   Future<void> logout()async {
-    await FirebaseAuth.instance.signOut();
+    await FirebaseAuth.instance.signOut().then((res) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Login()),
+      );
+    });;
+
   }
   @override
   void initState() {
@@ -52,9 +58,8 @@ class _BinState extends State<Bin> {
 
     sidebarUpperItems=[
       {'variant':'plain','text':'Notes','icon':Icons.notes_outlined,'onpage':false,'onPress':(){
-        Navigator.push(context,
-        MaterialPageRoute(builder:(context)=>Home() ),
-        );
+        Navigator.pushReplacementNamed(context, '/home');
+
       }},
       {'variant':'plain','text':'Reminders','icon':Icons.notifications_none_outlined,'onpage':false,'onPress':(){}},
       {'variant':'plain','text':'Edit Labels','icon':Icons.mode_edit_outlined,'onpage':false,
@@ -433,6 +438,9 @@ class _BinState extends State<Bin> {
                   right: 0,
                     child:ThFooter(
                       rightWidgets: [
+                        ThButton(variant: 'primary',text: 'log out',onPress: ()async{
+                          await logout();
+                        },),
                         ThButton(
                           variant: 'primary',
                           text: 'Empty bin',

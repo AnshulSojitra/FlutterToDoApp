@@ -75,14 +75,11 @@ class _ThTextboxState extends State<ThTextbox> {
 
     // Default TextField
     return Container(
-      constraints: BoxConstraints(
 
-
-      ),
       width: widget.width,
-      height: 40,
+      height: widget.height,
       child: TextField(
-        style: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
+        style: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black,overflow: TextOverflow.ellipsis),
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         controller: widget.controller,
@@ -94,12 +91,13 @@ class _ThTextboxState extends State<ThTextbox> {
         maxLines: maxLines,
         inputFormatters: format,
         decoration: InputDecoration(
+          // contentPadding: EdgeInsets.zero,
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30),borderSide: BorderSide(color: Colors.deepPurpleAccent, width: 2),),
           isDense: true,
           labelText: widget.text,
           labelStyle: TextStyle(color: NoteStore.isDarkMode ? Colors.white : Colors.black),
           floatingLabelBehavior: FloatingLabelBehavior.always,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(color: NoteStore.isDarkMode?Colors.white:Colors.black, width: 1),
