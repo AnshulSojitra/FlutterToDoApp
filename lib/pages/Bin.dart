@@ -438,9 +438,7 @@ class _BinState extends State<Bin> {
                   right: 0,
                     child:ThFooter(
                       rightWidgets: [
-                        ThButton(variant: 'primary',text: 'log out',onPress: ()async{
-                          await logout();
-                        },),
+
                         ThButton(
                           variant: 'primary',
                           text: 'Empty bin',
@@ -651,7 +649,7 @@ class _BinState extends State<Bin> {
                                 crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3, // 2 items per row
                                 crossAxisSpacing: 20,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: 3, // Adjust height vs width
+                                childAspectRatio: 2, // Adjust height vs width
                               ),
 
                               itemCount: snapshot.data!.docs.length,//isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,//

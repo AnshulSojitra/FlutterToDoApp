@@ -58,6 +58,9 @@ class _LoginState extends State<Login> {
           else if(e.message=="The email address is already in use by another account."){
             errorMessage = '*This email address is already registered.';
           }
+          else if(e.message=='"dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.signInWithEmailAndPassword".'){
+            errorMessage = '*Please enter both email and password.';
+          }
           else{
             errorMessage = e.message!;
           }
@@ -101,6 +104,9 @@ class _LoginState extends State<Login> {
         }
         else if(e.message=="The user is not found."){
           errorMessage = '*User not found. Please sign up.';
+        }
+        else if(e.message=='"dev.flutter.pigeon.firebase_auth_platform_interface.FirebaseAuthHostApi.signInWithEmailAndPassword".'){
+          errorMessage = '*Please enter both email and password.';
         }
         else{
           errorMessage = e.message!;
@@ -226,7 +232,7 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 20),
                 ThTextbox(
                   variant: 'text',
-                  text: 'Create Username',
+                  text: 'Enter Email',
                   controller: usernamecontroller,
                 ),
                 SizedBox(height: 20),

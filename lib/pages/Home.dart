@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:untitled1/component/ThAppBar.dart';
 import 'package:untitled1/component/ThButton.dart';
 import 'package:untitled1/component/ThIconBox.dart';
@@ -11,6 +15,8 @@ import 'package:untitled1/pages/NoteStore.dart';
 
 import 'Bin.dart';
 import 'Login.dart';
+
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,12 +30,12 @@ class _HomeState extends State<Home> {
   final TextEditingController labelController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
   late PageController pageController;
-  final List<String> items =[];
-  final List<String> deleteditems =[];
   final List<ThButton> labels =[];
   final FocusNode notefocusNode = FocusNode();
   final FocusNode searchfocusNode = FocusNode();
   final FocusNode focusNodelabel = FocusNode();
+  List<QueryDocumentSnapshot> allNotes = [];
+  List<QueryDocumentSnapshot> filteredNotes = [];
 
   String searchQuery = '';
   String editText = '';
@@ -49,9 +55,12 @@ class _HomeState extends State<Home> {
   double iconsize=22;
   double titlesize=20;
   double width=40;
+
   late List<Map<String, dynamic>> sidebarUpperItems=[];
   late List<Map<String, dynamic>> sidebarUpperItemsx=[];
   late List<Map<String, dynamic>> sidebarLowerItems=[];
+
+
 
   Future<void> logout()async{
     await FirebaseAuth.instance.signOut().then((res) {
@@ -73,12 +82,13 @@ class _HomeState extends State<Home> {
         'onPress':(){
           showDialog(context: context, builder: (context){
             return AlertDialog(
+
               backgroundColor: NoteStore.isDarkMode?Colors.grey.shade900:Colors.white,
               title: Text('Add Label',
               style: TextStyle(color: NoteStore.isDarkMode?Colors.white:Colors.black,),
                 ),
               content: SizedBox(
-                height: 100,
+                height: 110,
                 child: Column(
                     spacing: 8,
                     children:[
@@ -169,7 +179,64 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
   // In your _HomeState class (Home.dart)
+  TextSpan _highlightSearchText(String? text, String searchTerm) {
+    if (text == null || searchTerm.isEmpty || !isSearching) {
+      return TextSpan(
+        text: text ?? '',
+        style: TextStyle(
+          color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+          fontSize: 18,
+        ),
+      );
+    }
 
+    List<TextSpan> spans = [];
+    String lowerText = text.toLowerCase();
+    String lowerSearchTerm = searchTerm.toLowerCase();
+
+    int start = 0;
+    int index = lowerText.indexOf(lowerSearchTerm);
+
+    while (index != -1) {
+      // Add text before the match
+      if (index > start) {
+        spans.add(TextSpan(
+          text: text.substring(start, index),
+          style: TextStyle(
+            color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+            fontSize: 18,
+          ),
+        ));
+      }
+
+      // Add highlighted match
+      spans.add(TextSpan(
+        text: text.substring(index, index + searchTerm.length),
+        style: TextStyle(
+          color: NoteStore.isDarkMode ? Colors.black : Colors.white,
+          backgroundColor: Colors.yellow.withOpacity(0.7),
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+
+      start = index + searchTerm.length;
+      index = lowerText.indexOf(lowerSearchTerm, start);
+    }
+
+    // Add remaining text
+    if (start < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(start),
+        style: TextStyle(
+          color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+          fontSize: 18,
+        ),
+      ));
+    }
+
+    return TextSpan(children: spans);
+  }
 
   void editnote(int index){
     editindex=index;
@@ -178,25 +245,49 @@ class _HomeState extends State<Home> {
 
     });
   }
-
-  void addlabel(){
-    String text = labelController.text.trim();
-    if (text.isNotEmpty) {
+  void searchNotes(String query) {
+    if (query.isEmpty) {
       setState(() {
-        NoteStore.labels.add( {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
-        sidebarUpperItems.add(
-            {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
-        );
-        labelController.clear();
+        isSearching = false;
+        filteredNotes = [];
       });
-      FocusScope.of(context).requestFocus(focusNodelabel);
+      return;
     }
+
+    setState(() {
+      isSearching = true;
+      filteredNotes = allNotes.where((doc) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data == null || data['note'] == null) return false;
+
+        String noteText = data['note'].toString().toLowerCase();
+        return noteText.contains(query.toLowerCase());
+      }).toList();
+    });
+  }
+  void addlabel()async{
+    String text = labelController.text.trim();
+    NoteStore.labels.add( {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}});
+    sidebarUpperItems.add(
+        {'variant':'plain','text':text,'icon':Icons.label_important_outline,'onpage':false,'onPress':(){}}
+    );
+
+        await FirebaseFirestore.instance.collection("Labels").add({
+          "label": labelController.text.trim(),
+          "creator":FirebaseAuth.instance.currentUser!.uid,
+          "timestamp": FieldValue.serverTimestamp(),
+        });
+
+        labelController.clear();
+
+      FocusScope.of(context).requestFocus(focusNodelabel);
+
     setState(() {});
   }
   Future<void> uploadNotesToDatabse ()async{
     try{
       isediting?await FirebaseFirestore.instance.collection("Notes").doc(editid).update({"note":notecontroller.text}):
-      notecontroller.text.isEmpty?FirebaseFirestore.instance.collection("Notes").add({
+      notecontroller.text.isNotEmpty?FirebaseFirestore.instance.collection("Notes").add({
         "note": notecontroller.text.trim(),
         "creator":FirebaseAuth.instance.currentUser!.uid,
         "timestamp": FieldValue.serverTimestamp(),
@@ -254,6 +345,7 @@ class _HomeState extends State<Home> {
                 height: 40,
                 text: '',
                 prefixicon: Icon(Icons.search,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
+                onChanged: (value) => searchNotes(value),
               )//SearchBar
             ].whereType<Widget>().toList(),
             rightWidgets: [
@@ -368,56 +460,93 @@ class _HomeState extends State<Home> {
                                                     Icons.add,
                                                     color: NoteStore.isDarkMode?Colors.white:Colors.black,
                                                   ),
-                                                  onPressed: addnote,
+                                                  onPressed: notecontroller.text.trimRight().isEmpty? null:addnote,
                                                   tooltip: 'Add note',
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(
-                                                    Icons.image_outlined,
-                                                    color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                  ),
-                                                  tooltip: 'Add image',
-                                                  onPressed: () {
-                                                    if(MediaQuery.of(context).size.width<=426){
-                                                      opensidebar=false;
-                                                      setState(() {});
-                                                    }
-                                                  },
                                                 ),
                                               ],
                                             ),
                                           ),
                                         ),
+                                        isGridview
+                                            ? FutureBuilder(
+                                          future: FirebaseFirestore.instance
+                                              .collection("Notes")
+                                              .orderBy("timestamp")
+                                              .where("creator", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                                              .get(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return Center(
+                                                child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
+                                              );
+                                            }
 
-                                          isGridview?FutureBuilder(
-                                            future: FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
-                                            builder: (context, snapshot) {
-                                              if(snapshot.connectionState==ConnectionState.waiting){
-                                                return Center(
-                                                  child: CircularProgressIndicator(color: Colors.deepPurpleAccent,),
-                                                );
-                                              }
-                                              if(!snapshot.hasData){
-                                                return Padding(
-                                                  padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
-                                                  child: Column(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.lightbulb_outline,size: 100,
-                                                        color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),
+                                            if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                                child: Column(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.lightbulb_outline,
+                                                      size: 100,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.3)
+                                                          : Colors.black.withOpacity(0.1),
+                                                    ),
+                                                    Text(
+                                                      isSearching
+                                                          ? 'No notes found matching your search'
+                                                          : 'Notes that you add appear here',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: screenwidth <= 545 ? 20 : 24,
+                                                        color: NoteStore.isDarkMode
+                                                            ? Colors.white.withOpacity(0.6)
+                                                            : Colors.black.withOpacity(0.6),
                                                       ),
-                                                      Text('Notes that you add appear here',
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
-                                                            fontSize:screenwidth<=545?20: 24,
-                                                            color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
-                                                        ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+
+                                            // Store all notes for search
+                                            if (snapshot.data != null) {
+                                              allNotes = snapshot.data!.docs;
+                                            }
+
+                                            // Use filtered notes if search is active, otherwise use all notes
+                                            List<QueryDocumentSnapshot> notesToDisplay =
+                                            isSearching ? filteredNotes : allNotes;
+
+                                            if (isSearching && filteredNotes.isEmpty) {
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                                child: Column(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.search_off,
+                                                      size: 100,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.3)
+                                                          : Colors.black.withOpacity(0.1),
+                                                    ),
+                                                    Text(
+                                                      'No notes found matching "${searchController.text}"',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: screenwidth <= 545 ? 16 : 18,
+                                                        color: NoteStore.isDarkMode
+                                                            ? Colors.white.withOpacity(0.6)
+                                                            : Colors.black.withOpacity(0.6),
                                                       ),
-                                                    ],
-                                                  ),
-                                                );
-                                              }
-                                              return GridView.builder(
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+
+                                            return GridView.builder(
                                               shrinkWrap: true,
                                               physics: NeverScrollableScrollPhysics(),
                                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -426,7 +555,7 @@ class _HomeState extends State<Home> {
                                                 mainAxisSpacing: 10,
                                                 childAspectRatio: 1,
                                               ),
-                                              itemCount: snapshot.data!.docs.length,
+                                              itemCount: notesToDisplay.length,
                                               itemBuilder: (context, index) {
                                                 return Container(
                                                   decoration: BoxDecoration(
@@ -441,10 +570,13 @@ class _HomeState extends State<Home> {
                                                       children: [
                                                         Expanded(
                                                           child: Text(
-                                                            snapshot.data!.docs[index].data()['note'],
+                                                                () {
+                                                              final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                              return data?['note']?.toString() ?? '';
+                                                            }(),
                                                             style: TextStyle(
-                                                                color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                                fontSize: 18
+                                                              color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                              fontSize: 18,
                                                             ),
                                                             softWrap: true,
                                                             overflow: TextOverflow.ellipsis,
@@ -457,36 +589,49 @@ class _HomeState extends State<Home> {
                                                           children: [
                                                             IconButton(
                                                               icon: Icon(
-                                                                  Icons.edit_outlined,
-                                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                                  size: 20
+                                                                Icons.edit_outlined,
+                                                                color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                                size: 20,
                                                               ),
                                                               tooltip: 'Edit',
-                                                                onPressed: ()async{
-                                                                  isediting=true;
-                                                                  notecontroller.text=snapshot.data!.docs[index].data()['note'];
-                                                                  editid=snapshot.data!.docs[index].id;
-                                                                  editText=snapshot.data!.docs[index].data()['note'];
-                                                                  setState(() {});
-                                                                }
-                                                            ),//Edit button on note
+                                                              onPressed: () async {
+                                                                isediting = true;
+                                                                final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                                final noteText = data?['note']?.toString() ?? '';
+                                                                notecontroller.text = noteText;
+                                                                editid = notesToDisplay[index].id;
+                                                                editText = noteText;
+                                                                setState(() {});
+                                                              },
+                                                            ),
                                                             IconButton(
                                                               icon: Icon(
-                                                                  Icons.delete_outline,
-                                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                                  size: 20
+                                                                Icons.delete_outline,
+                                                                color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                                size: 20,
                                                               ),
                                                               tooltip: 'Delete',
-                                                                onPressed:()async{
-                                                                  await FirebaseFirestore.instance.collection("Bin").add({
-                                                                    'deletednote': snapshot.data!.docs[index].data()['note'],
-                                                                    'creator': FirebaseAuth.instance.currentUser!.uid,
-                                                                    'timestamp': FieldValue.serverTimestamp(),
-                                                                  });
-                                                                  await FirebaseFirestore.instance.collection("Notes").doc(snapshot.data!.docs[index].id).delete();
-                                                                  setState(() {});
+                                                              onPressed: () async {
+                                                                final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                                final noteText = data?['note']?.toString() ?? '';
+
+                                                                await FirebaseFirestore.instance.collection("Bin").add({
+                                                                  'deletednote': noteText,
+                                                                  'creator': FirebaseAuth.instance.currentUser!.uid,
+                                                                  'timestamp': FieldValue.serverTimestamp(),
+                                                                });
+                                                                await FirebaseFirestore.instance
+                                                                    .collection("Notes")
+                                                                    .doc(notesToDisplay[index].id)
+                                                                    .delete();
+
+                                                                // Refresh search results after deletion
+                                                                if (isSearching) {
+                                                                  searchNotes(searchController.text);
                                                                 }
-                                                            ),//Delete button of note
+                                                                setState(() {});
+                                                              },
+                                                            ),
                                                           ],
                                                         ),
                                                       ],
@@ -494,105 +639,173 @@ class _HomeState extends State<Home> {
                                                   ),
                                                 );
                                               },
-                                            );}
-                                          ):
-                                          FutureBuilder(
-                                            future: FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
-                                            builder: (context, snapshot) {
-                                              if(snapshot.connectionState==ConnectionState.waiting){
-                                                return Center(
-                                                  child: CircularProgressIndicator(color: Colors.deepPurpleAccent,),
-                                                );
-                                              }
-                                              if(!snapshot.hasData){
-                                                return  Padding(
-                                                  padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
-                                                  child: Column(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.lightbulb_outline,
-                                                        size: 100,
-                                                        color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),
+                                            );
+                                          },
+                                        )
+                                            : FutureBuilder(
+                                          future: FirebaseFirestore.instance
+                                              .collection("Notes")
+                                              .orderBy("timestamp")
+                                              .where("creator", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                                              .get(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return Center(
+                                                child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
+                                              );
+                                            }
+
+                                            if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                                child: Column(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.lightbulb_outline,
+                                                      size: 100,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.3)
+                                                          : Colors.black.withOpacity(0.1),
+                                                    ),
+                                                    Text(
+                                                      isSearching
+                                                          ? 'No notes found matching your search'
+                                                          : 'Notes that you add appear here',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        color: NoteStore.isDarkMode
+                                                            ? Colors.white.withOpacity(0.6)
+                                                            : Colors.black.withOpacity(0.6),
                                                       ),
-                                                      Text('Notes that you add appear here',
-                                                        overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
-                                                        ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+
+                                            // Store all notes for search
+                                            if (snapshot.data != null) {
+                                              allNotes = snapshot.data!.docs;
+                                            }
+
+                                            // Use filtered notes if search is active, otherwise use all notes
+                                            List<QueryDocumentSnapshot> notesToDisplay =
+                                            isSearching ? filteredNotes : allNotes;
+
+                                            if (isSearching && filteredNotes.isEmpty) {
+                                              return Padding(
+                                                padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                                child: Column(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.search_off,
+                                                      size: 100,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.3)
+                                                          : Colors.black.withOpacity(0.1),
+                                                    ),
+                                                    Text(
+                                                      'No notes found matching "${searchController.text}"',
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        color: NoteStore.isDarkMode
+                                                            ? Colors.white.withOpacity(0.6)
+                                                            : Colors.black.withOpacity(0.6),
                                                       ),
-                                                    ],
-                                                  ),
-                                                );
-                                              }
-                                              return ListView.separated(
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+
+                                            return ListView.separated(
                                               shrinkWrap: true,
                                               physics: NeverScrollableScrollPhysics(),
-                                              itemCount: snapshot.data!.docs.length,
-                                              itemBuilder:(context,index){
+                                              itemCount: notesToDisplay.length,
+                                              itemBuilder: (context, index) {
                                                 return Container(
                                                   decoration: BoxDecoration(
                                                     color: Colors.transparent,
                                                     borderRadius: BorderRadius.circular(16),
-                                                    border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                                    border: Border.all(width: 2, color: Colors.deepPurpleAccent),
                                                   ),
-
                                                   child: Padding(
-                                                    padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                                    padding: EdgeInsets.all(screenwidth <= 847 ? 7.60 : 10),
                                                     child: Row(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: [
-                                                          Expanded(
-                                                            child: Text(
-                                                              snapshot.data!.docs[index].data()['note'],
-                                                              style: TextStyle(
-                                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                                  fontSize: 18
-                                                              ),
-                                                              softWrap: true,
-                                                              overflow: TextOverflow.ellipsis,
-                                                              maxLines: 1,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                                () {
+                                                              final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                              return data?['note']?.toString() ?? '';
+                                                            }(),
+                                                            style: TextStyle(
+                                                              color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                              fontSize: 18,
                                                             ),
+                                                            softWrap: true,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            maxLines: 1,
                                                           ),
-                                                          Spacer(),
-                                                          IconButton(
-                                                            icon: Icon(
-                                                              Icons.edit_outlined,
-                                                              color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                              size: 20,
-                                                            ),
-                                                            tooltip: 'Edit',
-                                                              onPressed: ()async{
-                                                                isediting=true;
-                                                                notecontroller.text=snapshot.data!.docs[index].data()['note'];
-                                                                editid=snapshot.data!.docs[index].id;
-                                                                editText=snapshot.data!.docs[index].data()['note'];
-                                                                setState(() {});
-                                                              }
+                                                        ),
+                                                        Spacer(),
+                                                        IconButton(
+                                                          icon: Icon(
+                                                            Icons.edit_outlined,
+                                                            color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                            size: 20,
                                                           ),
-                                                          IconButton(
-                                                            icon: Icon(
-                                                              Icons.delete_outline,
-                                                              color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                              size: 20,
-                                                            ),
-                                                            tooltip: 'Delete',
-                                                            onPressed:()async{
-                                                              await FirebaseFirestore.instance.collection("Bin").add({
-                                                                'deletednote': snapshot.data!.docs[index].data()['note'],
-                                                                'creator': FirebaseAuth.instance.currentUser!.uid,
-                                                                'timestamp': FieldValue.serverTimestamp(),
-                                                              });
-                                                              await FirebaseFirestore.instance.collection("Notes").doc(snapshot.data!.docs[index].id).delete();
-                                                              setState(() {});
-                                                            },
-                                                          )
-                                                        ]),
+                                                          tooltip: 'Edit',
+                                                          onPressed: () async {
+                                                            isediting = true;
+                                                            final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                            final noteText = data?['note']?.toString() ?? '';
+                                                            notecontroller.text = noteText;
+                                                            editid = notesToDisplay[index].id;
+                                                            editText = noteText;
+                                                            setState(() {});
+                                                          },
+                                                        ),
+                                                        IconButton(
+                                                          icon: Icon(
+                                                            Icons.delete_outline,
+                                                            color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                            size: 20,
+                                                          ),
+                                                          tooltip: 'Delete',
+                                                          onPressed: () async {
+                                                            final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                            final noteText = data?['note']?.toString() ?? '';
+
+                                                            await FirebaseFirestore.instance.collection("Bin").add({
+                                                              'deletednote': noteText,
+                                                              'creator': FirebaseAuth.instance.currentUser!.uid,
+                                                              'timestamp': FieldValue.serverTimestamp(),
+                                                            });
+                                                            await FirebaseFirestore.instance
+                                                                .collection("Notes")
+                                                                .doc(notesToDisplay[index].id)
+                                                                .delete();
+
+                                                            // Refresh search results after deletion
+                                                            if (isSearching) {
+                                                              searchNotes(searchController.text);
+                                                            }
+                                                            setState(() {});
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 );
-                                              }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
-                                            );}
-                                          )
+                                              },
+                                              separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
+                                            );
+                                          },
+                                        )
                                       ],
                                     ),
                                   ),
@@ -682,11 +895,7 @@ class _HomeState extends State<Home> {
                 height: 40,
                 text: 'Search',
                 prefixicon: Icon(Icons.search,color: NoteStore.isDarkMode?Colors.white:Colors.black,),
-                onChanged: (value) {
-                  searchQuery = searchController.text;
-                  print(searchQuery);
-                  setState(() {});
-                },
+                onChanged: (value) => searchNotes(value),
               )
             ],
             rightWidgets: [
@@ -802,212 +1011,350 @@ class _HomeState extends State<Home> {
                                                 tooltip: 'Add note',
                                                 color: NoteStore.isDarkMode?Colors.white:Colors.black,
                                               ),
-                                              IconButton(
-                                                  icon: Icon(Icons.image_outlined),
-                                                  tooltip: 'Add image',
-                                                  color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                  onPressed: () {}
-                                              ),
+
                                             ],
                                           ),
                                         ),
                                       ),
-                                        isGridview?FutureBuilder(
-                                          future: isSearching?
-                                          FirebaseFirestore.instance.collection("Notes").orderBy("note").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).startAt([searchQuery]).endAt([searchQuery + '\uf8ff']).get()
-                                          :FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
-                                          builder: (context,snapshot) {
-                                            if(snapshot.connectionState==ConnectionState.waiting){
-                                              return Center(
-                                                child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
-                                              );
-                                            }
-                                            if(!snapshot.hasData){
-                                              return Padding(
-                                                padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
-                                                child: Column(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.lightbulb_outline,size: 100,
-                                                      color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),
-                                                    ),
-                                                    Text('Notes that you add appear here',
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          fontSize:screenwidth<=545?20: 24,
-                                                          color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
-                                            return GridView.builder(
-                                            shrinkWrap: true,
-                                            physics: NeverScrollableScrollPhysics(),
-                                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3, // 2 items per row
-                                              crossAxisSpacing: 20,
-                                              mainAxisSpacing: 10,
-                                              childAspectRatio: 3, // Adjust height vs width
-                                            ),
 
-                                             itemCount: snapshot.data!.docs.length,//isSearching?NoteStore.filteredIndex.length:NoteStore.items.length,//
-                                            itemBuilder: (context, index) {
-                                              return Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  borderRadius: BorderRadius.circular(16),
-                                                  border: Border.all(width: 2,color: Colors.deepPurpleAccent),
-                                                ),
-
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(screenwidth<=847?7.60:10),
-                                                  child: Row(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        snapshot.data!.docs[index].data()['note'],
-                                                        style: TextStyle(fontSize: 18,color: NoteStore.isDarkMode?Colors.white:Colors.black),
-                                                        softWrap: true,
-                                                        overflow: TextOverflow.ellipsis,
-                                                        maxLines: 5,
-                                                      ),
-                                                    ),
-                                                    Spacer(),
-                                                    Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                        children:[
-                                                      IconButton(
-                                                        icon: Icon(
-                                                          Icons.edit_outlined,size: 20,
-                                                          color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                        ),
-                                                        tooltip: 'Edit',
-                                                        onPressed: ()async{
-                                                          isediting=true;
-                                                          notecontroller.text=snapshot.data!.docs[index].data()['note'];
-                                                          editid=snapshot.data!.docs[index].id;
-                                                          editText=snapshot.data!.docs[index].data()['note'];
-                                                          setState(() {});
-                                                        }
-                                                      ),
-                                                      IconButton(
-                                                        icon: Icon(
-                                                          Icons.delete_outline,size: 20,
-                                                          color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                        ),
-                                                        tooltip: 'Delete',
-                                                        onPressed:()async{
-                                                          await FirebaseFirestore.instance.collection("Bin").add({
-                                                                'deletednote': snapshot.data!.docs[index].data()['note'],
-                                                                'creator': FirebaseAuth.instance.currentUser!.uid,
-                                                                'timestamp': FieldValue.serverTimestamp(),
-                                                              });
-                                                          await FirebaseFirestore.instance.collection("Notes").doc(snapshot.data!.docs[index].id).delete();
-                                                          setState(() {});
-                                                        }
-                                                      )
-                                                    ])
-                                                  ]),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                          },
-                                        ):
-                                      FutureBuilder(
-                                        future:  isSearching?
-                                        FirebaseFirestore.instance.collection("Notes").orderBy("note").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).startAt([searchQuery]).endAt([searchQuery + '\uf8ff']).get()
-                                            :FirebaseFirestore.instance.collection("Notes").orderBy("timestamp").where("creator",isEqualTo: FirebaseAuth.instance.currentUser!.uid).get(),
-                                        builder: (context,snapshot) {
-                                          if(snapshot.connectionState==ConnectionState.waiting){
+                                      isGridview
+                                          ? FutureBuilder(
+                                        future: FirebaseFirestore.instance
+                                            .collection("Notes")
+                                            .orderBy("timestamp")
+                                            .where("creator", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                                            .get(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
                                             return Center(
                                               child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
                                             );
                                           }
-                                          if(!snapshot.hasData){
+
+                                          if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
                                             return Padding(
-                                              padding: EdgeInsets.symmetric(vertical: screenheight/2-200),
+                                              padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
                                               child: Column(
                                                 children: [
                                                   Icon(
-                                                    Icons.lightbulb_outline,size: 100,
-                                                    color: NoteStore.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.1),
+                                                    Icons.lightbulb_outline,
+                                                    size: 100,
+                                                    color: NoteStore.isDarkMode
+                                                        ? Colors.white.withOpacity(0.3)
+                                                        : Colors.black.withOpacity(0.1),
                                                   ),
-                                                  Text('Notes that you add appear here',
+                                                  Text(
+                                                    isSearching
+                                                        ? 'No notes found matching your search'
+                                                        : 'Notes that you add appear here',
                                                     overflow: TextOverflow.ellipsis,
                                                     style: TextStyle(
-                                                        fontSize:screenwidth<=545?20: 24,
-                                                        color: NoteStore.isDarkMode?Colors.white.withOpacity(0.6):Colors.black.withOpacity(0.6)
+                                                      fontSize: screenwidth <= 545 ? 20 : 24,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.6)
+                                                          : Colors.black.withOpacity(0.6),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             );
                                           }
-                                          return ListView.separated(
+
+                                          // Store all notes for search
+                                          if (snapshot.data != null) {
+                                            allNotes = snapshot.data!.docs;
+                                          }
+
+                                          // Use filtered notes if search is active, otherwise use all notes
+                                          List<QueryDocumentSnapshot> notesToDisplay =
+                                          isSearching ? filteredNotes : allNotes;
+
+                                          if (isSearching && filteredNotes.isEmpty) {
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                              child: Column(
+                                                children: [
+                                                  Icon(
+                                                    Icons.search_off,
+                                                    size: 100,
+                                                    color: NoteStore.isDarkMode
+                                                        ? Colors.white.withOpacity(0.3)
+                                                        : Colors.black.withOpacity(0.1),
+                                                  ),
+                                                  Text(
+                                                    'No notes found matching "${searchController.text}"',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: screenwidth <= 545 ? 16 : 18,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.6)
+                                                          : Colors.black.withOpacity(0.6),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                          return GridView.builder(
                                             shrinkWrap: true,
                                             physics: NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data!.docs.length,
-                                            itemBuilder:(context,index){
+                                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: screenwidth<=1245?screenwidth<=847?1:2:3,
+                                              crossAxisSpacing: 10,
+                                              mainAxisSpacing: 10,
+                                              childAspectRatio: 2,
+                                            ),
+                                            itemCount: notesToDisplay.length,
+                                            itemBuilder: (context, index) {
                                               return Container(
                                                 decoration: BoxDecoration(
                                                   color: Colors.transparent,
                                                   borderRadius: BorderRadius.circular(16),
-                                                  border: Border.all(width: 2,color: Colors.deepPurpleAccent),
+                                                  border: Border.all(width: 2, color: Colors.deepPurpleAccent),
                                                 ),
-
                                                 child: Padding(
-                                                  padding: EdgeInsets.all(screenwidth<=847?7.60:10),
+                                                  padding: const EdgeInsets.all(5.0),
                                                   child: Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            snapshot.data!.docs[index].data()['note'],
-                                                            style: TextStyle(fontSize: 18,color: NoteStore.isDarkMode?Colors.white:Colors.black),
-                                                            softWrap: true,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            maxLines: 1,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                              () {
+                                                            final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                            return data?['note']?.toString() ?? '';
+                                                          }(),
+                                                          style: TextStyle(
+                                                            color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                            fontSize: 18,
                                                           ),
+                                                          softWrap: true,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 5,
                                                         ),
-                                                        Spacer(),
-                                                        IconButton(
-                                                          icon: Icon(
-                                                            Icons.edit_outlined,size: 20,
-                                                            color: NoteStore.isDarkMode?Colors.white:Colors.black,
-                                                          ),
-                                                          tooltip: 'Edit',
-                                                            onPressed: ()async{
-                                                              isediting=true;
-                                                              notecontroller.text=snapshot.data!.docs[index].data()['note'];
-                                                              editid=snapshot.data!.docs[index].id;
-                                                              editText=snapshot.data!.docs[index].data()['note'];
+                                                      ),
+                                                      Spacer(),
+                                                      Column(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(
+                                                              Icons.edit_outlined,
+                                                              color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                              size: 20,
+                                                            ),
+                                                            tooltip: 'Edit',
+                                                            onPressed: () async {
+                                                              isediting = true;
+                                                              final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                              final noteText = data?['note']?.toString() ?? '';
+                                                              notecontroller.text = noteText;
+                                                              editid = notesToDisplay[index].id;
+                                                              editText = noteText;
                                                               setState(() {});
-                                                            }
-                                                        ),
-                                                        IconButton(
-                                                          icon: Icon(
-                                                            Icons.delete_outline,size: 20,
-                                                            color: NoteStore.isDarkMode?Colors.white:Colors.black,
+                                                            },
                                                           ),
-                                                          tooltip: 'Delete',
-                                                            onPressed:()async{
+                                                          IconButton(
+                                                            icon: Icon(
+                                                              Icons.delete_outline,
+                                                              color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                              size: 20,
+                                                            ),
+                                                            tooltip: 'Delete',
+                                                            onPressed: () async {
+                                                              final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                              final noteText = data?['note']?.toString() ?? '';
+
                                                               await FirebaseFirestore.instance.collection("Bin").add({
-                                                                'deletednote': snapshot.data!.docs[index].data()['note'],
+                                                                'deletednote': noteText,
                                                                 'creator': FirebaseAuth.instance.currentUser!.uid,
                                                                 'timestamp': FieldValue.serverTimestamp(),
                                                               });
-                                                              await FirebaseFirestore.instance.collection("Notes").doc(snapshot.data!.docs[index].id).delete();
+                                                              await FirebaseFirestore.instance
+                                                                  .collection("Notes")
+                                                                  .doc(notesToDisplay[index].id)
+                                                                  .delete();
+
+                                                              // Refresh search results after deletion
+                                                              if (isSearching) {
+                                                                searchNotes(searchController.text);
+                                                              }
                                                               setState(() {});
-                                                            })
-                                                      ]),
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               );
-                                           }, separatorBuilder: (BuildContext context, int index) =>SizedBox(height: 10,),
-                                        );}
+                                            },
+                                          );
+                                        },
+                                      )
+                                          : FutureBuilder(
+                                        future: FirebaseFirestore.instance
+                                            .collection("Notes")
+                                            .orderBy("timestamp")
+                                            .where("creator", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                                            .get(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return Center(
+                                              child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
+                                            );
+                                          }
+
+                                          if (!snapshot.hasData || snapshot.data?.docs.isEmpty == true) {
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                              child: Column(
+                                                children: [
+                                                  Icon(
+                                                    Icons.lightbulb_outline,
+                                                    size: 100,
+                                                    color: NoteStore.isDarkMode
+                                                        ? Colors.white.withOpacity(0.3)
+                                                        : Colors.black.withOpacity(0.1),
+                                                  ),
+                                                  Text(
+                                                    isSearching
+                                                        ? 'No notes found matching your search'
+                                                        : 'Notes that you add appear here',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.6)
+                                                          : Colors.black.withOpacity(0.6),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                          // Store all notes for search
+                                          if (snapshot.data != null) {
+                                            allNotes = snapshot.data!.docs;
+                                          }
+
+                                          // Use filtered notes if search is active, otherwise use all notes
+                                          List<QueryDocumentSnapshot> notesToDisplay =
+                                          isSearching ? filteredNotes : allNotes;
+
+                                          if (isSearching && filteredNotes.isEmpty) {
+                                            return Padding(
+                                              padding: EdgeInsets.symmetric(vertical: screenheight / 2 - 200),
+                                              child: Column(
+                                                children: [
+                                                  Icon(
+                                                    Icons.search_off,
+                                                    size: 100,
+                                                    color: NoteStore.isDarkMode
+                                                        ? Colors.white.withOpacity(0.3)
+                                                        : Colors.black.withOpacity(0.1),
+                                                  ),
+                                                  Text(
+                                                    'No notes found matching "${searchController.text}"',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: NoteStore.isDarkMode
+                                                          ? Colors.white.withOpacity(0.6)
+                                                          : Colors.black.withOpacity(0.6),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                          return ListView.separated(
+                                            shrinkWrap: true,
+                                            physics: NeverScrollableScrollPhysics(),
+                                            itemCount: notesToDisplay.length,
+                                            itemBuilder: (context, index) {
+                                              return Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  borderRadius: BorderRadius.circular(16),
+                                                  border: Border.all(width: 2, color: Colors.deepPurpleAccent),
+                                                ),
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(screenwidth <= 847 ? 7.60 : 10),
+                                                  child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                              () {
+                                                            final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                            return data?['note']?.toString() ?? '';
+                                                          }(),
+                                                          style: TextStyle(
+                                                            color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                            fontSize: 18,
+                                                          ),
+                                                          softWrap: true,
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 1,
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          Icons.edit_outlined,
+                                                          color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                          size: 20,
+                                                        ),
+                                                        tooltip: 'Edit',
+                                                        onPressed: () async {
+                                                          isediting = true;
+                                                          final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                          final noteText = data?['note']?.toString() ?? '';
+                                                          notecontroller.text = noteText;
+                                                          editid = notesToDisplay[index].id;
+                                                          editText = noteText;
+                                                          setState(() {});
+                                                        },
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          Icons.delete_outline,
+                                                          color: NoteStore.isDarkMode ? Colors.white : Colors.black,
+                                                          size: 20,
+                                                        ),
+                                                        tooltip: 'Delete',
+                                                        onPressed: () async {
+                                                          final data = notesToDisplay[index].data() as Map<String, dynamic>?;
+                                                          final noteText = data?['note']?.toString() ?? '';
+
+                                                          await FirebaseFirestore.instance.collection("Bin").add({
+                                                            'deletednote': noteText,
+                                                            'creator': FirebaseAuth.instance.currentUser!.uid,
+                                                            'timestamp': FieldValue.serverTimestamp(),
+                                                          });
+                                                          await FirebaseFirestore.instance
+                                                              .collection("Notes")
+                                                              .doc(notesToDisplay[index].id)
+                                                              .delete();
+
+                                                          // Refresh search results after deletion
+                                                          if (isSearching) {
+                                                            searchNotes(searchController.text);
+                                                          }
+                                                          setState(() {});
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
+                                          );
+                                        },
                                       )
                                     ],
                                   ),
